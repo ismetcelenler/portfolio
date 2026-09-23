@@ -21,6 +21,9 @@ KOK = Path(__file__).resolve().parent.parent
 KAYNAK = KOK / "drafts" / "hero-parcacik" / "kaydirma"
 HEDEF = KOK / "site"
 DOSYALAR = ["Parcaciklar.js", "ad-imza.svg", "oyna-dugmesi.svg", "ismet-portre.webp"]
+# Oyun ayrı projede geliştirilir; yayında site/oyun/ olur, PLAY düğmesi onu açar.
+OYUN = KOK.parent / "Hypercasual_game" / "oyun"
+OYUN_DOSYALAR = ["index.html", "core.js"]
 
 
 def degistir(s, eski, yeni, ad):
@@ -66,8 +69,8 @@ def ayikla(s):
     return s
 
 
-def js_denetle(html):
-    """Sayfadaki her <script> bloğunu node ile sözdizimi açısından denetler."""
+def js_denetle(html, ad="index.html", dosyalar=()):
+    """Sayfadaki her <script> bloğunu ve verilen .js dosyalarını node ile sözdizimi açısından denetler."""
     node = shutil.which("node")
     if not node:
         print("uyarı: node yok, JS sözdizimi denetlenmedi")
@@ -80,9 +83,28 @@ def js_denetle(html):
             f.write_text(kod, encoding="utf-8")
             r = subprocess.run([node, "--check", str(f)], capture_output=True, text=True)
             if r.returncode:
-                sys.exit(f"HATA: script {i} sözdizimi:\n{r.stderr}")
+                sys.exit(f"HATA: {ad} script {i} sözdizimi:\n{r.stderr}")
+        for f in dosyalar:
+            r = subprocess.run([node, "--check", str(f)], capture_output=True, text=True)
+            if r.returncode:
+                sys.exit(f"HATA: {f.name} sözdizimi:\n{r.stderr}")
     finally:
         shutil.rmtree(tmp)
+
+
+def oyun_kopyala():
+    """Hypercasual_game/oyun -> site/oyun. Yalnız listelenen dosyalar gider (demo, not vb. gitmez)."""
+    if not OYUN.is_dir():
+        sys.exit(f"HATA: oyun klasörü yok: {OYUN}")
+    hedef = HEDEF / "oyun"
+    hedef.mkdir()
+    for ad in OYUN_DOSYALAR:
+        shutil.copy2(OYUN / ad, hedef / ad)
+    html = (hedef / "index.html").read_text(encoding="utf-8")
+    js_denetle(html, "oyun/index.html", [p for p in hedef.glob("*.js")])
+    # PLAY düğmesinin açtığı yol ile oyunun kapatma mesajı birbirini tutmalı
+    if "oyun-kapat" not in html:
+        sys.exit("HATA: oyun/index.html 'oyun-kapat' mesajını göndermiyor, katman kapanmaz")
 
 
 def main():
@@ -101,6 +123,8 @@ def main():
     (HEDEF / "ikon").mkdir()
     for ad in ikonlar:
         shutil.copy2(KAYNAK / "ikon" / ad, HEDEF / "ikon" / ad)
+    if 'src="oyun/"' in html:
+        oyun_kopyala()
 
     boyut = sum(p.stat().st_size for p in HEDEF.rglob("*") if p.is_file())
     print(f"site/ üretildi: index.html + {len(DOSYALAR)} dosya + {len(ikonlar)} ikon, toplam {boyut/1024:.0f} KB")

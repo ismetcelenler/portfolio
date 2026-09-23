@@ -309,6 +309,9 @@ h1{font-size:clamp(40px,8vw,96px);line-height:.9;letter-spacing:0;max-width:18ch
   .oyna.acik{transform:translateX(-12px) rotate(-8deg)}
   .oyna.acik:hover,.oyna.acik:active{transform:translateX(-12px) rotate(-5deg)}}
 @media(prefers-reduced-motion:reduce){.oyna{transition:none}}
+.oyun-katman{position:fixed;inset:0;z-index:50;background:#0e0f13;height:100vh;height:100dvh}
+.oyun-katman iframe{display:block;width:100%;height:100%;border:0}
+html.oyun-acik,html.oyun-acik body{overflow:hidden;overscroll-behavior:none}
 /* iletisim: acik renkli Mac penceresi, alanlar retro cizgili kutular */
 .iletisim{display:flex;flex-direction:column;align-items:center;padding:14vh 26px 12vh}
 .iletisim .bolum-lab{margin-bottom:18px}
@@ -496,17 +499,43 @@ h1 .imlec{color:var(--a);animation:imlec 1.1s steps(1) infinite}
 <button class="oyna" id="oyna" type="button" aria-label="Oyun" aria-expanded="false"><img src="oyna-dugmesi.svg?v=2" alt="" width="760" height="260"></button>
 <script>
 /* Oyun dugmesi: parcacik sisteminden bagimsiz. Gomuluyken tiklama cikarir;
-   cikmisken tiklama oyunu acacak (oyun secilince buraya baglanacak). */
+   cikmisken tiklama oyunu tam ekran katmanda acar. Oyun oyun/ altinda ayri
+   sayfadir (kaynagi Hypercasual_game/oyun, yayinla.py kopyalar); yalniz
+   tiklaninca yuklenir, kapaninca iframe silinir (WebGL bellegi birakilir).
+   Parcacik dongusu 'oyun' olayiyla duraklar: iki WebGL dongusu telefonu yorar. */
 (() => {
   const d = document.getElementById('oyna')
   const ac = v => { d.classList.toggle('acik', v); d.setAttribute('aria-expanded', v) }
+  let kat = null
+  function oyunAc(){
+    if(kat) return
+    kat = document.createElement('div')
+    kat.className = 'oyun-katman'
+    kat.innerHTML = '<iframe src="oyun/" title="Jump Jump" allow="fullscreen"></iframe>'
+    document.body.appendChild(kat)
+    document.documentElement.classList.add('oyun-acik')
+    dispatchEvent(new CustomEvent('oyun', { detail: true }))
+    // Tam ekran yalniz tiklamanin hemen ardindan istenebilir; iPhone desteklemez, katman yine tum ekrani kaplar
+    if(kat.requestFullscreen) kat.requestFullscreen().catch(() => {})
+    const f = kat.querySelector('iframe')
+    f.addEventListener('load', () => f.contentWindow.focus())
+  }
+  function oyunKapat(){
+    if(!kat) return
+    if(document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    kat.remove(); kat = null
+    document.documentElement.classList.remove('oyun-acik')
+    dispatchEvent(new CustomEvent('oyun', { detail: false }))
+    ac(false); d.focus()
+  }
+  addEventListener('message', e => { if(e.origin === location.origin && e.data === 'oyun-kapat') oyunKapat() })
   d.addEventListener('click', e => {
     e.stopPropagation()
     if(!d.classList.contains('acik')) { ac(true); return }
-    // TODO: oyun
+    oyunAc()
   })
   document.addEventListener('click', () => ac(false))
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') ac(false) })
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') { if(kat) oyunKapat(); else ac(false) } })
 })()
 </script>
 
@@ -1064,8 +1093,10 @@ function baslat(){
   })
 
   // performans korumasi
-  let aktif = !document.hidden
-  document.addEventListener('visibilitychange', () => { aktif = !document.hidden; sonT = performance.now() })
+  let aktif = !document.hidden, oyunAcik = false
+  document.addEventListener('visibilitychange', () => { aktif = !document.hidden && !oyunAcik; sonT = performance.now() })
+  // oyun tam ekran katmanda acikken parcaciklar durur
+  addEventListener('oyun', e => { oyunAcik = e.detail; aktif = !document.hidden && !oyunAcik; sonT = performance.now() })
   const azHareket = matchMedia('(prefers-reduced-motion: reduce)').matches
   const hepCiz = false
 
