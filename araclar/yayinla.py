@@ -23,7 +23,10 @@ HEDEF = KOK / "site"
 DOSYALAR = ["Parcaciklar.js", "ad-imza.svg", "oyna-dugmesi.svg", "ismet-portre.webp"]
 # Oyun ayrı projede geliştirilir; yayında site/oyun/ olur, PLAY düğmesi onu açar.
 OYUN = KOK.parent / "Hypercasual_game" / "oyun"
-OYUN_DOSYALAR = ["index.html", "core.js"]
+OYUN_DOSYALAR = ["index.html", "core.js",
+                 # Karakterler: yalnız oyunun yüklediği dosyalar (.blend kaynakları ve eski GLB'ler gitmez)
+                 "assets/ismet-rigged.glb", "assets/acelya-rigged.glb",
+                 "assets/ismet-icon.png", "assets/acelya-icon.png"]
 
 
 def degistir(s, eski, yeni, ad):
@@ -99,8 +102,13 @@ def oyun_kopyala():
     hedef = HEDEF / "oyun"
     hedef.mkdir()
     for ad in OYUN_DOSYALAR:
+        (hedef / ad).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(OYUN / ad, hedef / ad)
     html = (hedef / "index.html").read_text(encoding="utf-8")
+    # Sayfanın andığı her assets/ dosyası listede olmalı, yoksa canlıda 404 verir
+    for yol in sorted(set(re.findall(r"assets/[\w.-]+", html))):
+        if yol not in OYUN_DOSYALAR:
+            sys.exit(f"HATA: oyun/index.html '{yol}' kullanıyor ama OYUN_DOSYALAR listesinde yok")
     js_denetle(html, "oyun/index.html", [p for p in hedef.glob("*.js")])
     # PLAY düğmesinin açtığı yol ile oyunun kapatma mesajı birbirini tutmalı
     if "oyun-kapat" not in html:

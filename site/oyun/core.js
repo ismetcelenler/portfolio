@@ -147,7 +147,11 @@
     const up = (e) => { if (e.pointerId !== pid) return; pid = null; g.release(); };
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', (e) => { if (e.pointerId !== pid) return; pid = null; g.cancel(); });
-    window.addEventListener('keydown', (e) => { if (e.code === 'Space' && !e.repeat) { e.preventDefault(); g.press(); } });
+    window.addEventListener('keydown', (e) => {
+      if (e.code !== 'Space' || e.repeat || e.target.closest?.('button')) return;
+      e.preventDefault();
+      g.press();
+    });
     window.addEventListener('keyup', (e) => { if (e.code === 'Space') g.release(); });
     window.addEventListener('blur', () => { pid = null; g.cancel(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) { pid = null; g.cancel(); } });
