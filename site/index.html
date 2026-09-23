@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İsmet Çelenler — AI-Focused Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&family=VT323&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#0B0B0C; --ink:#F2F3F5;
+  --ink-60:rgba(242,243,245,.62); --ink-40:rgba(242,243,245,.42);
+  --hair:#23262B;
+  --a:#FFD23A;
+}
+:root[data-zemin="acik"]{
+  --paper:#FEFEFE; --ink:#1E1E1E;
+  --ink-60:rgba(30,30,30,.6); --ink-40:rgba(30,30,30,.4);
+  --hair:#DEDEDE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.lab{font-family:"Fragment Mono",monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-40)}
+
+.hero{min-height:calc(100vh - 53px);min-height:calc(100svh - 53px);display:flex;flex-direction:column;position:relative;grid-area:hero;min-width:0}
+
+/* ---------- yan sutun: hero'dan deneyimin sonuna kadar solda sabit ---------- */
+.sayfa{display:grid;grid-template-columns:minmax(220px,270px) minmax(0,1fr) minmax(220px,270px);
+  grid-template-areas:"yan hero ." "yan hak .";column-gap:16px;padding:0 26px}
+/* Sag sutun bos ve sol ile ayni genislikte: orta alan simetrik kalir,
+   parcacik modeli ekranin TAM ortasinda durur; her sey o eksene hizali. */
+.yan{grid-area:yan;position:sticky;top:18px;align-self:start;display:grid;gap:14px;padding-top:18px}
+.yan .hakkinda dl{grid-template-columns:1fr;gap:0}
+.yan .hakkinda dt{text-align:left;margin-top:4px;font-size:14px}
+.yan .hakkinda dd{font-size:17px;line-height:1.15}
+.yan .bilgi-ad{font-size:22px}
+.yan .bilgi-bas{font-size:15px;padding-bottom:7px;margin-bottom:6px}
+.yan .hakkinda .bilgi{padding:10px 12px 12px}
+/* dar ekranda: once hero, sonra foto+ozet, sonra hakkimda; sabitlik kalkar */
+@media(max-width:1100px){
+  .sayfa{grid-template-columns:1fr;grid-template-areas:"hero" "yan" "hak";padding:0}
+  .yan{position:relative;top:0;width:min(380px,calc(100% - 52px));margin:0 auto;padding-top:0}
+}
+.ustbar{display:flex;align-items:center;gap:20px;padding:16px 26px;border-bottom:1px solid var(--hair)}
+.mark{font-family:"Fragment Mono",monospace;font-size:12px;letter-spacing:.04em}
+.ustbar nav{margin-left:auto;display:flex;gap:20px}
+.ustbar nav a{color:var(--ink-60);text-decoration:none}
+.ustbar nav a:hover{color:var(--ink)}
+
+.orta{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:30px;padding:34px 26px 48px;text-align:center;container-type:inline-size}
+
+/* ---------- simulasyon penceresi: canli sahne bunun ICINDE ---------- */
+/* cerceve yok: sahne dogrudan hero uzerinde, ayni olcude */
+.sim{width:min(760px, 100%);background:transparent}
+.sim .ekran{position:relative;aspect-ratio:760/462;width:100%}
+@media(max-width:620px){.sim .ekran{aspect-ratio:20/21}}
+/* Tuval artik tam ekran ve sabit. Model yine .ekran dikdortgenine cizilir
+   (kamera o kutuya gore ayarlanir); tam ekran yalnizca gecis icin. */
+#sahne{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;z-index:5}
+.sim .lr{display:flex;flex-wrap:wrap;align-items:center;gap:5px;justify-content:center;
+  margin-top:14px;font-family:"Fragment Mono",monospace;font-size:10.5px;letter-spacing:.05em}
+.sim .lr span{color:var(--ink-40);margin-right:6px}
+.sim .lr button{font-family:inherit;font-size:10.5px;background:none;border:1px solid var(--hair);
+  color:var(--ink-60);padding:4px 10px;cursor:pointer;transition:.15s}
+.sim .lr button:hover{border-color:var(--ink-60);color:var(--ink)}
+.sim .lr button[aria-pressed="true"]{border-color:var(--a);color:var(--a)}
+.sim .altyazi{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;justify-content:center;
+  margin-top:12px;font-family:"VT323",monospace;font-size:17px;line-height:1.2;color:var(--ink-60)}
+.sim .altyazi #simAd{color:var(--a)}
+
+/* ---------- alan etiketleri: sag ust, alt alta ---------- */
+.alanlar{position:absolute;right:26px;top:16px;z-index:6;
+  display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+@media(max-width:820px){.alanlar{position:static;flex-direction:row;flex-wrap:wrap;
+  justify-content:center;gap:2px 14px;margin:14px 0 -10px}}
+.alanlar button{font-family:"Fragment Mono",monospace;font-size:10.5px;letter-spacing:.05em;
+  background:none;border:0;padding:3px 0 3px 14px;cursor:pointer;
+  color:var(--ink-40);position:relative;transition:color .16s;white-space:nowrap}
+.alanlar button::before{content:"";position:absolute;left:0;top:50%;width:6px;height:6px;
+  margin-top:-3px;border:1px solid currentColor;transition:background .16s}
+.alanlar button:hover{color:var(--ink-60)}
+.alanlar button[aria-pressed="true"]{color:var(--a)}
+.alanlar button[aria-pressed="true"]::before{background:var(--a)}
+
+/* ---------- metin ---------- */
+h1{font-size:clamp(32px,6.6vw,78px);line-height:.82;letter-spacing:-.035em;font-weight:600;
+  max-width:15ch;margin:0}
+h1 em{font-style:normal;color:var(--a)}
+.alt{font-size:16px;color:var(--ink-60);max-width:50ch}
+.baglar{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;font-size:16px}
+.baglar a{color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.baglar a:hover{color:var(--a)}
+
+.uyari{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:var(--paper);padding:20px;text-align:center;font-size:14px;color:var(--ink-60)}
+.uyari.gorunur{display:flex}
+
+/* ---------- hakkimda: ad parcaciklardan olusur ---------- */
+.hakkimda{min-height:170vh;padding:14vh 26px 30vh;display:flex;flex-direction:column;align-items:center;grid-area:hak;min-width:0}
+/* Ad metni gorunmez ama yerinde: duzeni ve ekran okuyucuyu o tasir,
+   goruntuyu parcaciklar. Tuval bu kutunun yerini her karede okur. */
+.ad{font-family:"Archivo",system-ui,sans-serif;font-weight:800;font-size:clamp(40px,7.5vw,130px);
+  line-height:1.15;letter-spacing:0;white-space:nowrap;color:var(--ink);text-align:center;width:100%;
+  transition:color .4s ease}
+/* Devir: parcaciklar vardiginda soner, gercek yazi belirir (0.4 s).
+   Gizleme yalniz parcacik sistemi calisiyorsa (html.parcacik): JS, WebGL2
+   ya da float destegi yoksa yazilar dogrudan gorunur, sayfa bos kalmaz. */
+.parcacik .ad:not(.acik){color:transparent}
+/* Ad artik Reis'in imza SVG'si (tek renk beyaz dolgu, 1834x475). Ayni dosya
+   hem parcaciklarin hedefi (tuvale cizilip orneklenir) hem de devirde kalan
+   gercek imza: ikisi ayni geometride, yazi belirirken ziplamaz. */
+.ad img{display:block;width:min(760px,100%);height:auto;margin:0 auto;transition:opacity .4s ease}
+.parcacik .ad:not(.acik) img{opacity:0}
+.yer{margin-top:9vh;width:min(720px,100%);display:grid;gap:26px}
+
+/* ---------- hakkimda: foto + bilgi + yetenek pencereleri ---------- */
+.h-izgara{width:min(1180px,100%);margin-top:9vh;display:grid;gap:28px 36px;
+  grid-template-columns:minmax(0,1fr);align-items:start}
+
+.yetenek{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;align-items:start}
+@media(max-width:820px){.h-izgara{grid-template-columns:1fr}.h-sol{grid-row:auto;max-width:380px}}
+.h-sag{display:grid;gap:26px}
+/* akista duran pencere: masaustundekilerle ayni stil, surukleme yok */
+.pen.akis{position:relative;left:auto;top:auto}
+.pen.akis .bar{cursor:default}
+/* cercevesiz portre: saydam PNG dogrudan sayfa zemininde */
+.portre{display:block;width:100%;height:auto}
+.hakkinda .bilgi{padding:14px 16px 16px}
+.bilgi-bas{display:flex;flex-direction:column;align-items:center;gap:0;padding-bottom:10px;
+  border-bottom:1px solid rgba(30,30,30,.25);margin-bottom:10px;font-size:18px;color:rgba(30,30,30,.7)}
+.bilgi-ad{font-size:30px;color:#1E1E1E}
+.hakkinda dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:19px;line-height:1.2}
+.hakkinda dt{text-align:right;color:rgba(30,30,30,.6)}
+.hakkinda dd{color:#1E1E1E}
+@media(max-width:520px){.hakkinda dl{grid-template-columns:1fr}.hakkinda dt{text-align:left;margin-top:6px}}
+.klasor-bas{display:flex;justify-content:space-between;gap:10px;padding:3px 9px;
+  border-bottom:1px solid #1E1E1E;font-size:15px;color:rgba(30,30,30,.65)}
+.klasor ul{list-style:none;padding:8px 10px 10px;font-size:19px;line-height:1.3;color:#1E1E1E}
+.klasor li::before{content:"▸ ";color:rgba(30,30,30,.45)}
+
+/* ---------- deneyim: zaman cizgisi istasyonu ---------- */
+.deneyim{width:min(980px,100%);margin-top:22vh}
+.bolum-lab{font-family:"Fragment Mono",monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-40);margin-bottom:26px;text-align:center}
+/* Cizgi ve dugumler parcaciklarin sekliyle AYNI geometride: JS ikisini de
+   dugumlerin gercek konumundan kurar. Devirde yalniz saydamlik degisir. */
+.zaman{position:relative;height:60px;display:grid;grid-template-columns:repeat(3,1fr);align-items:center;
+  transition:opacity .4s ease}
+.parcacik .zaman:not(.acik){opacity:0}
+.z-cizgi{position:absolute;height:3px;background:var(--ink);top:50%;margin-top:-1.5px}
+.dugum{justify-self:center;width:14px;height:14px;border-radius:50%;background:var(--ink);position:relative;
+  box-shadow:0 0 0 5px var(--paper),0 0 0 7px var(--ink)}
+.kartlar{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:26px}
+@media(max-width:760px){.kartlar{grid-template-columns:1fr}}
+.kart{border:1px solid var(--hair);padding:16px 18px;
+  transition:opacity .45s ease,transform .45s ease}
+.parcacik .kart:not(.acik){opacity:0;transform:translateY(10px)}
+.kart .tarih{font-family:"VT323",monospace;font-size:19px;color:var(--a)}
+.kart h3{font-size:17px;font-weight:600;margin:4px 0 6px}
+.kart p{font-size:14px;line-height:1.5;color:var(--ink-40)}
+
+/* ---------- projeler ---------- */
+.projeler{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:48px;
+  padding:14vh 26px 40vh;max-width:1320px;margin:0 auto}
+@media(max-width:900px){.projeler{grid-template-columns:1fr}}
+.p-sol{position:sticky;top:64px;align-self:start}
+@media(max-width:900px){.p-sol{position:relative;top:0}}
+.p-sag h2{font-size:clamp(34px,5vw,60px);font-weight:600;letter-spacing:-.03em;line-height:.9;margin-bottom:34px}
+.p-kartlar{display:grid;gap:22px}
+.p-kart{border:1px solid var(--hair);padding:22px 22px 18px;transition:border-color .2s}
+.p-kart:hover{border-color:var(--ink-60)}
+.p-kart .no{font-family:"Fragment Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-40)}
+.p-kart h3{font-size:22px;font-weight:600;margin:8px 0 8px}
+.p-kart p{font-size:15px;line-height:1.55;color:var(--ink-40);max-width:56ch}
+.p-kart .etiket{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.p-kart .etiket span{font-family:"VT323",monospace;font-size:16px;border:1px solid var(--hair);padding:1px 8px;color:var(--ink-60)}
+.p-kart.vurgu{border-color:var(--a)}
+
+/* ---------- masaustu: Macintosh pencereleri ---------- */
+.masaustu{position:relative;height:600px;border:1px solid var(--hair);
+  background-image:radial-gradient(rgba(242,243,245,.07) 1px,transparent 1px);background-size:6px 6px}
+@media(max-width:900px){.masaustu{height:520px}}
+.menu{display:flex;gap:18px;align-items:center;height:22px;padding:0 10px;border-bottom:1px solid var(--ink);
+  background:#F7F7F5;color:#1E1E1E;font-family:"VT323",monospace;font-size:17px;line-height:22px;user-select:none}
+.menu .saat{margin-left:auto}
+.pen{position:absolute;border:1px solid var(--ink);background:#F7F7F5;color:#1E1E1E;text-align:left;
+  box-shadow:3px 3px 0 rgba(242,243,245,.16)}
+.pen .bar{background:#1E1E1E;color:#DEDEDE;height:21px;padding:0 6px;display:flex;align-items:center;gap:7px;
+  font-family:"VT323",monospace;font-size:16px;line-height:16px;cursor:grab;user-select:none;touch-action:none}
+.pen .bar:active{cursor:grabbing}
+.pen .bar .kapa{width:10px;height:10px;border:1px solid #DEDEDE;flex:none}
+/* klasik baslik cubugu seritleri */
+.pen .bar .serit{flex:1;height:9px;background:repeating-linear-gradient(#DEDEDE 0 1px,transparent 1px 3px);opacity:.55}
+.pen .altbar{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #1E1E1E;padding:2px 7px;
+  font-family:"VT323",monospace;font-size:15px;line-height:15px;color:rgba(30,30,30,.65)}
+.pen.koyu{background:#0B0B0C}
+.pen.koyu .altbar{border-top-color:var(--ink);color:var(--ink-60)}
+/* parcacik penceresinin ici: kamera bu kutuya oturtulur */
+#kmEkran{width:330px;height:230px;max-width:calc(100vw - 90px)}
+.pen .not{padding:8px 10px;font-family:"VT323",monospace;font-size:18px;line-height:1.25;width:220px;
+  min-height:5.2em;cursor:pointer;user-select:none}
+.pen .not::after{content:"▌";animation:imlec 1.1s steps(1) infinite}
+@media(prefers-reduced-motion:reduce){.pen .not::after{animation:none}}
+#kayipCiz{display:block;width:230px;height:84px}
+.ikonlar{position:absolute;right:14px;top:40px;display:grid;gap:14px;justify-items:center}
+.ikon{background:none;border:0;cursor:pointer;display:grid;justify-items:center;gap:3px;
+  font-family:"VT323",monospace;font-size:16px;color:var(--ink-60)}
+.ikon span{padding:0 3px}
+.ikon:hover span,.ikon:focus-visible span{background:var(--ink);color:var(--paper)}
+
+/* ---------- VT323 her yerde (Reis, 2026-09-22) ----------
+   Macintosh pencereleriyle butunluk. VT323'un x-yuksekligi kucuk: boyutlar
+   ~1.25 kat buyutuldu, paragraflar 19-20 px (kucukte okunmuyor). Tek agirlik
+   var; tarayicinin sahte kalini pikselleri bulandiriyor, kapatildi.
+   Istisna: ad (el yazisi imza) ve gelistirme paneli. */
+body{font-family:"VT323",monospace;font-synthesis:none}
+h1,h2,h3,.p-sag h2{font-weight:400}
+.lab,.mark,.bolum-lab,.p-kart .no,.kutu b{font-family:"VT323",monospace;letter-spacing:.06em}
+.mark{font-size:18px}
+.bolum-lab,.p-kart .no,.kutu b{font-size:17px}
+.ustbar nav a{font-size:19px}
+.alanlar button{font-family:"VT323",monospace;font-size:17px;letter-spacing:.03em}
+.sim .lr,.sim .lr button{font-family:"VT323",monospace;font-size:16px}
+h1{font-size:clamp(40px,8vw,96px);line-height:.9;letter-spacing:0;max-width:18ch}
+.alt{font-size:21px;line-height:1.3;max-width:52ch}
+.baglar{font-size:20px}
+.kutu{font-size:20px;line-height:1.35}
+.kart .tarih{font-size:20px}
+.kart h3{font-size:22px}
+.kart p{font-size:19px;line-height:1.3}
+.p-sag h2{font-size:clamp(46px,6.5vw,84px)}
+.p-kart h3{font-size:28px}
+.p-kart p{font-size:20px;line-height:1.3}
+.p-kart .etiket span{font-size:17px}
+
+/* ogrenme orani: gradient descent'in altinda acilan kucuk kutu */
+.alanlar .lr{display:flex;flex-wrap:wrap;gap:4px;align-items:center;max-width:180px;
+  margin:3px 0 6px 14px;padding:6px 7px;border:1px solid var(--hair);background:var(--paper)}
+.alanlar .lr[hidden]{display:none}
+.alanlar .lr span{width:100%;font-size:15px;color:var(--ink-40)}
+.alanlar .lr button{font-family:"VT323",monospace;font-size:15px;padding:1px 7px;border:1px solid var(--hair);
+  color:var(--ink-60)}
+.alanlar .lr button::before{content:none}
+.alanlar .lr button:hover{border-color:var(--ink-60);color:var(--ink)}
+.alanlar .lr button[aria-pressed="true"]{border-color:var(--a);color:var(--a)}
+@media(max-width:820px){.alanlar .lr{flex-basis:100%;max-width:none;justify-content:center;margin:4px 0 0}}
+
+/* ---------- telefon (<=600 px) ---------- */
+@media(max-width:600px){
+  .ustbar{padding:12px 16px;gap:10px}
+  .mark{white-space:nowrap;font-size:17px}
+  .ustbar nav{gap:14px}
+  /* menu: yalniz ikon; metin ekran okuyucu icin yerinde (font-size 0) */
+  .ustbar nav a{font-size:0}
+  .ustbar nav a .ik{margin:0}
+  .orta{padding:24px 16px 40px;gap:22px}
+  .hakkimda{padding:10vh 16px 20vh}
+  .yan{width:min(300px,calc(100% - 32px))}
+  .portre{width:78%;margin:0 auto}
+  .projeler{padding:10vh 16px 24vh;gap:36px}
+  /* masaustu: pencereler ust uste binmesin diye alt alta, sabit yerde.
+     Surukleme telefonda kapali (satir ici konumu !important ezer): dokunmatikte
+     sayfa kaydirmasiyla catisiyor. */
+  .masaustu{height:auto;padding:34px 8px 12px;display:grid;gap:14px;justify-items:start}
+  #masaustu .pen{position:relative;left:auto!important;top:auto!important;max-width:100%}
+  #masaustu .pen .bar{cursor:default}
+  #kmPen{width:100%}
+  #kmEkran{width:100%;max-width:none;height:auto;aspect-ratio:330/230}
+  .ikonlar{position:static;display:flex;flex-wrap:wrap;gap:12px 18px;justify-content:center;width:100%}
+  .masaustu .menu{position:absolute;left:0;right:0;top:0}
+}
+
+/* ---------- piksel ikonlar (Streamline Pixel, CC BY 4.0) ----------
+   SVG'lerin pikselleri 21'lik izgarada (32 birimde 1.524): 21 px'te her
+   piksel tam 1 ekran pikseline denk gelir, keskin. Baska boyut bulaniklastirir;
+   buyuk ikon 42 px (2 kat). Maske ile ciziliyor ki rengi yazidan alsin. */
+.ik{display:inline-block;width:21px;height:21px;flex:none;vertical-align:-4px;margin-right:6px;
+  background:currentColor;-webkit-mask:var(--ik) center/100% 100% no-repeat;mask:var(--ik) center/100% 100% no-repeat}
+.ik.buyuk{width:42px;height:42px;margin:0}
+.baglar a,.ustbar nav a{display:inline-flex;align-items:center}
+.baglar a .ik{margin-right:7px}
+.bilgi-bas .ik.buyuk{margin-bottom:4px;color:#1E1E1E}
+/* koyu ozet penceresi: ayni stil, siyah uzerine beyaz yazi ve ikon */
+.hakkinda.koyu .bilgi-bas{border-bottom-color:var(--hair);color:var(--ink-60)}
+.hakkinda.koyu .bilgi-ad,.hakkinda.koyu dd,.hakkinda.koyu .bilgi-bas .ik.buyuk{color:var(--ink)}
+.hakkinda.koyu dt{color:var(--ink-40)}
+.klasor-bas span:first-child{display:inline-flex;align-items:center}
+.klasor-bas .ik{margin-right:6px;color:#1E1E1E}
+.menu .ik{margin-right:4px}
+.ik.gh{width:24px;height:24px;vertical-align:-6px}
+/* Oyun dugmesi: sag kenara gomulu, yalniz sol ucu (~44 px, yildiz) gorunur.
+   Ilk tiklama disari cikarir, disari tiklama ya da Esc geri gomer.
+   Tuvalin (5) ustunde, gelistirme panelinin (20) altinda. Oyun henuz yok. */
+.oyna{--gw:clamp(120px,11vw,170px);--cik:44px;position:fixed;right:0;top:50%;z-index:15;width:var(--gw);
+  padding:0;border:0;background:none;cursor:pointer;
+  transform:translate(calc(100% - var(--cik)),-50%) rotate(-8deg);transition:transform .35s cubic-bezier(.2,.8,.3,1.2)}
+.oyna img{display:block;width:100%;height:auto}
+.oyna:not(.acik):hover{--cik:60px}
+.oyna.acik{transform:translate(-14px,-50%) rotate(-8deg)}
+.oyna.acik:hover{transform:translate(-14px,-50%) rotate(-5deg) scale(1.05)}
+.oyna.acik:active{transform:translate(-14px,-50%) rotate(-5deg) scale(.97)}
+.oyna:focus-visible{outline:2px solid var(--a);outline-offset:4px}
+@media(max-width:1100px){.oyna{--gw:110px;--cik:34px;top:auto;bottom:18px;
+  transform:translateX(calc(100% - var(--cik))) rotate(-8deg)}
+  .oyna.acik{transform:translateX(-12px) rotate(-8deg)}
+  .oyna.acik:hover,.oyna.acik:active{transform:translateX(-12px) rotate(-5deg)}}
+@media(prefers-reduced-motion:reduce){.oyna{transition:none}}
+/* iletisim: acik renkli Mac penceresi, alanlar retro cizgili kutular */
+.iletisim{display:flex;flex-direction:column;align-items:center;padding:14vh 26px 12vh}
+.iletisim .bolum-lab{margin-bottom:18px}
+.mesaj{width:min(560px,100%)}
+.mesaj .bal{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.m-ic{padding:12px 14px 14px;display:grid;gap:8px;font-family:"VT323",monospace;font-size:19px}
+.m-satir{display:grid;grid-template-columns:80px 1fr;align-items:center;gap:8px;padding-bottom:6px;
+  border-bottom:1px dotted rgba(30,30,30,.35)}
+.m-govde{display:grid;gap:6px}
+.m-et{color:rgba(30,30,30,.6)}
+.mesaj input,.mesaj textarea{font:inherit;color:#1E1E1E;background:#fff;border:1px solid #1E1E1E;
+  padding:3px 7px;border-radius:0;width:100%;min-width:0}
+.mesaj textarea{resize:vertical;min-height:120px;line-height:1.2}
+.mesaj input:focus,.mesaj textarea:focus{outline:none;box-shadow:2px 2px 0 #1E1E1E}
+.mesaj .altbar{align-items:center;padding:4px 7px;font-size:17px;line-height:17px}
+.mesaj[data-durum="hata"] #mDurum{color:#B3261E}
+.mesaj[data-durum="tamam"] #mDurum{color:#1E7A34}
+.m-gonder{display:inline-flex;align-items:center;gap:6px;font-family:"VT323",monospace;font-size:18px;
+  color:#1E1E1E;background:#F7F7F5;border:1px solid #1E1E1E;padding:2px 12px;cursor:pointer;box-shadow:2px 2px 0 #1E1E1E}
+.m-gonder:active{transform:translate(2px,2px);box-shadow:none}
+.m-gonder:disabled{opacity:.5;cursor:wait}
+.m-gonder .ik{width:21px;height:21px;margin:0}
+.m-yedek{margin-top:16px;font-size:17px;color:var(--ink-40)}
+.m-yedek a{color:var(--ink-60)}
+@media(max-width:600px){.m-satir{grid-template-columns:1fr;gap:3px}}
+/* baslik: iki sabit satir, ikinci satir asili girintiyle yazinin altinda */
+h1{display:grid;grid-template-columns:auto auto;justify-content:center;column-gap:.35em;
+  text-align:left;max-width:none;font-size:clamp(28px,10cqi,96px)}
+h1 .b-satirlar{display:flex;flex-direction:column}
+h1 .b-satir{white-space:nowrap}
+h1 .istem{color:var(--ink-40)}
+h1 .imlec{color:var(--a);animation:imlec 1.1s steps(1) infinite}
+@keyframes imlec{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){h1 .imlec{animation:none}}
+/* egitim: deneyimle ayni kart dili, parcacik istasyonu degil (hep acik) */
+/* egitim: kart degil, tek kutuda iki kompakt satir (tarih | baslik + not) */
+.egitim-b{width:min(720px,100%);margin-top:10vh}
+.egitim-b .bolum-lab{margin-bottom:14px}
+.e-liste{list-style:none;margin:0;padding:0;border:1px solid var(--hair)}
+.e-liste li{display:grid;grid-template-columns:190px 1fr;gap:14px;padding:10px 16px;align-items:baseline}
+.e-liste li+li{border-top:1px solid var(--hair)}
+.e-liste .tarih{font-family:"VT323",monospace;font-size:17px;color:var(--a)}
+.e-liste b{display:block;font-weight:400;font-size:18px;color:var(--ink)}
+.e-liste div span{display:block;font-size:16px;line-height:1.25;color:var(--ink-40);margin-top:2px}
+@media(max-width:600px){.e-liste li{grid-template-columns:1fr;gap:2px}}
+.p-kart .gh-bag{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:18px;
+  color:var(--ink-60);text-decoration:none}
+.p-kart .gh-bag .ik{margin:0}
+.p-kart .gh-bag:hover{color:var(--a)}
+.atif{padding:0 26px 40px;text-align:center;font-size:16px;color:var(--ink-40)}
+.atif a{color:var(--ink-60)}
+.kutu{border:1px dashed var(--hair);padding:18px 20px;color:var(--ink-40);font-size:20px;line-height:1.35}
+.kutu b{display:block;font-family:"VT323",monospace;font-size:17px;font-weight:400;
+  letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;color:var(--ink-60)}
+</style>
+</head>
+<body>
+
+<canvas id="sahne"></canvas>
+
+<div class="ustbar">
+  <span class="mark">İSMET ÇELENLER</span>
+  <nav><a href="#hakkimda"><i class="ik" style="--ik:url(ikon/single-user-shield.svg)" aria-hidden="true"></i>Hakkında</a><a href="#projeler"><i class="ik" style="--ik:url(ikon/content-files-folder-open.svg)" aria-hidden="true"></i>Projeler</a><a href="#iletisim"><i class="ik" style="--ik:url(ikon/email-envelope.svg)" aria-hidden="true"></i>İletişim</a></nav>
+</div>
+
+<!-- Hero'dan deneyimin sonuna kadar solda sabit (sticky) sutun: foto + kisa
+     ozet. Projeler bolumunde yerini oradaki Mac masaustune birakir. -->
+<div class="sayfa">
+<aside class="yan">
+  <img class="portre" src="ismet-portre.webp" width="700" height="720" alt="İsmet Çelenler" decoding="async">
+  <!-- klasik "Bu Macintosh Hakkinda" penceresinin sakasi. Satirlar CV'den. -->
+  <div class="pen akis koyu hakkinda">
+    <div class="bar"><span class="kapa"></span><span class="serit"></span><span>Bu Bilgisayar Hakkında</span><span class="serit"></span></div>
+    <div class="bilgi">
+      <div class="bilgi-bas"><i class="ik buyuk" style="--ik:url(ikon/computer-old-electronics.svg)" aria-hidden="true"></i><span class="bilgi-ad">İsmet Çelenler</span><span>AI-Focused Software Engineer</span></div>
+      <dl>
+        <dt>İşlemci</dt><dd>görüntü işleme + makine öğrenmesi</dd>
+        <dt>Yardımcı işlemci</dt><dd>AI ajanları, workflow otomasyonu</dd>
+        <dt>Bellek</dt><dd>Bilgisayar Mühendisliği, Balıkesir Üniversitesi — 2026</dd>
+        <dt>Dil paketleri</dt><dd>Türkçe · English · Español</dd>
+        <dt>Konum</dt><dd>İzmir</dd>
+      </dl>
+    </div>
+  </div>
+</aside>
+
+<div class="hero">
+
+  <div class="alanlar" id="alanlar">
+    <button data-a="2" aria-pressed="false">k-means</button>
+    <button data-a="3" aria-pressed="true">Aizawa attractor</button>
+    <button data-a="5" aria-pressed="false">gradient descent</button>
+    <!-- gradient descent'e basinca acilan kucuk kutu; tekrar basinca kapanir -->
+    <div class="lr" id="lrKutu" hidden>
+      <span>learning rate η</span>
+      <button data-l="0.15" aria-pressed="false">0.15</button>
+      <button data-l="0.4"  aria-pressed="false">0.4</button>
+      <button data-l="0.9"  aria-pressed="true">0.9</button>
+      <button data-l="1.8"  aria-pressed="false">1.8</button>
+      <button data-l="3.2"  aria-pressed="false">3.2</button>
+    </div>
+    <button data-a="4" aria-pressed="false">Lorenz attractor</button>
+  </div>
+
+  <div class="orta">
+
+    <div class="sim">
+      <div class="ekran" id="ekran">
+        <div class="uyari" id="uyari">Bu tarayıcıda WebGL2 yok — gerçek sitede burada statik bir yedek görsel olacak.</div>
+      </div>
+      <div class="altyazi">
+        <span id="simAd">Aizawa attractor</span>
+      </div>
+    </div>
+
+    <h1><span class="istem" aria-hidden="true">&gt;</span><span class="b-satirlar"><span class="b-satir">Computer Vision <em>+</em></span> <span class="b-satir">ML <em>+</em> AI Workflows<span class="imlec" aria-hidden="true">_</span></span></span></h1>
+    <p class="alt">YOLO ile pose estimation ve zaman serisi analizi yapan modeller geliştiriyor,
+       data preprocessing'den fullstack arayüze kadar baştan sona kuruyorum.</p>
+    <div class="baglar"><a href="#projeler"><i class="ik" style="--ik:url(ikon/content-files-folder-open.svg)" aria-hidden="true"></i>Projeler</a><a href="https://github.com/ismetcelenler" target="_blank" rel="noopener"><i class="ik gh" style="--ik:url(ikon/pixelarticons-github.svg)" aria-hidden="true"></i>GitHub</a></div>
+  </div>
+</div>
+
+<section class="hakkimda" id="hakkimda">
+  <h2 class="ad" id="ad"><img id="adImza" src="ad-imza.svg?v=2" alt="İsmet Çelenler" width="1834" height="475" decoding="async"></h2>
+  <div class="h-izgara">
+    <div class="h-sag">
+      <div class="kutu"><b>Hakkımda</b>Fullstack web uygulamalarından masaüstü uygulamalara, blockchain
+        tabanlı bir Telegram Mini Uygulamasından bir araştırma merkezinin veri arayüzüne kadar farklı
+        alanlarda projeler geliştirerek deneyim kazandım. Son 1,5 yıldır computer vision, makine
+        öğrenmesi ve derin öğrenme üzerine yoğunlaşıyorum: pose estimation, re-identification ve
+        RAG tabanlı sistemler üzerinde çalışıyorum. Web tarafındaki deneyimimi de bu modelleri
+        kullanılabilir arayüzlere dönüştürmek için kullanıyorum.</div>
+
+    </div>
+
+    <!-- (a) yetenekler: alan basina bir klasor penceresi. Yuzde cubugu yok:
+         yalniz gercekten is yapilmis araclar (CV + GitHub). -->
+    <div class="yetenek">
+      <div class="pen akis klasor">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>goruntu-isleme/</span><span class="serit"></span></div>
+        <div class="klasor-bas"><span><i class="ik" style="--ik:url(ikon/photography-camera-1.svg)" aria-hidden="true"></i>6 öğe</span><span>staj · BovineVision</span></div>
+        <ul><li>YOLO — pose estimation</li><li>anahtar noktaların zaman serisi analizi</li><li>homografi matrisleri</li><li>çoklu kamera senkronizasyonu</li><li>Siamese network + Triplet Loss</li><li>data preprocessing</li></ul>
+      </div>
+      <div class="pen akis klasor">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>ml/</span><span class="serit"></span></div>
+        <div class="klasor-bas"><span><i class="ik" style="--ik:url(ikon/health-brain-1.svg)" aria-hidden="true"></i>6 öğe</span><span>USD/TRY · Sentiment</span></div>
+        <ul><li>TensorFlow / Keras</li><li>scikit-learn</li><li>LSTM</li><li>Hugging Face Transformers</li><li>Word2Vec Skip-gram (Gensim)</li><li>NLTK — Türkçe NLP ön işleme</li></ul>
+      </div>
+      <div class="pen akis klasor">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>ajanlar/</span><span class="serit"></span></div>
+        <div class="klasor-bas"><span><i class="ik" style="--ik:url(ikon/technology-robot-ai.svg)" aria-hidden="true"></i>5 öğe</span><span>multi-tool-agent · PaytarAI</span></div>
+        <ul><li>LangChain</li><li>RAG — ChromaDB</li><li>OpenAI API</li><li>N8n</li><li>FastAPI + WebSocket</li></ul>
+      </div>
+      <div class="pen akis klasor">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>web/</span><span class="serit"></span></div>
+        <div class="klasor-bas"><span><i class="ik" style="--ik:url(ikon/coding-apps-websites-programming-hold-code.svg)" aria-hidden="true"></i>8 öğe</span><span>fullstack</span></div>
+        <ul><li>Python · JavaScript · TypeScript</li><li>React · Next.js · Vue.js</li><li>Flask · FastAPI · Express</li><li>Three.js / WebGL</li><li>GSAP</li><li>Supabase · Firebase · MongoDB</li><li>Cosmos DB · SQLite</li><li>Git · Docker · Vercel · Vite</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="deneyim" id="deneyim">
+    <div class="bolum-lab">Deneyim</div>
+    <div class="zaman" id="zaman">
+      <div class="z-cizgi" id="zCizgi"></div>
+      <span class="dugum"></span><span class="dugum"></span><span class="dugum"></span>
+    </div>
+    <div class="kartlar">
+      <div class="kart"><div class="tarih">Haziran 2025 - Temmuz 2025 · İzmir</div><h3>WebApp Development Intern — KobiKit.com</h3><p>TON Chain ekosistemi üzerinde çalışan blockchain odaklı bir girişimde Vue.js, Node.js/Express ve Cosmos DB kullanarak çiftçilik temalı bir Telegram Mini Uygulaması geliştirdim. Telegram WebApp API entegrasyonu, gerçek zamanlı skor yönetimi ve GSAP ile UI animasyonları.</p></div>
+      <div class="kart"><div class="tarih">Temmuz 2025 - Eylül 2025 · Zaragoza, İspanya</div><h3>Software Development Intern — CAPA</h3><p>Gaz TPC'ler gibi dedektör tabanlı deneylerde veri toplama, simülasyon ve analiz için kullanılan REST-for-Physics (Rare Event Searches Toolkit) Framework'ü ile çalıştım. Paralel olarak HTML, CSS ve JavaScript ile verilerle etkileşimi kolaylaştıran bir web arayüzü geliştirdim.</p></div>
+      <div class="kart"><div class="tarih">şimdi · remote</div><h3>Stajyer — Agritech girişimi</h3><p>Görüntü işleme teknikleri ve YOLO kullanarak büyükbaş hayvanlarda pose estimation ve topallık tespiti üzerine çalışıyorum. Data preprocessing ve görüntü işleme modellerinin eğitilmesi; çoklu kamera senkronizasyonu ve homografi matrisleri. Sahada bizzat deneyimleme fırsatı buldum.</p></div>
+    </div>
+  </div>
+
+  <div class="egitim-b" id="egitim">
+    <div class="bolum-lab">Eğitim</div>
+    <ul class="e-liste">
+      <li><span class="tarih">Tahmini mezuniyet 2026</span><div><b>Bilgisayar Mühendisliği — Balıkesir Üniversitesi</b></div></li>
+      <li><span class="tarih">Ocak 2024 - Haziran 2024</span><div><b>Lisans Eğitimi (Erasmus+) — Politechnika Czestochowska</b><span>Erasmus+ öğrenim hareketliliği kapsamında bir dönemimi Polonya'da tamamladım.</span></div></li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<button class="oyna" id="oyna" type="button" aria-label="Oyun" aria-expanded="false"><img src="oyna-dugmesi.svg?v=2" alt="" width="760" height="260"></button>
+<script>
+/* Oyun dugmesi: parcacik sisteminden bagimsiz. Gomuluyken tiklama cikarir;
+   cikmisken tiklama oyunu acacak (oyun secilince buraya baglanacak). */
+(() => {
+  const d = document.getElementById('oyna')
+  const ac = v => { d.classList.toggle('acik', v); d.setAttribute('aria-expanded', v) }
+  d.addEventListener('click', e => {
+    e.stopPropagation()
+    if(!d.classList.contains('acik')) { ac(true); return }
+    // TODO: oyun
+  })
+  document.addEventListener('click', () => ac(false))
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') ac(false) })
+})()
+</script>
+
+<section class="projeler" id="projeler">
+  <div class="p-sol">
+    <div class="masaustu" id="masaustu">
+      <div class="menu"><i class="ik" style="--ik:url(ikon/computer-old-electronics.svg)" aria-hidden="true"></i><span>Dosya</span><span>Düzen</span><span>Görünüm</span><span class="saat" id="saat">--:--</span></div>
+
+      <div class="pen koyu" id="kmPen" style="left:18px;top:44px">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>kmeans.app</span><span class="serit"></span></div>
+        <div id="kmEkran"></div>
+        <div class="altbar"><span>k = 5 · n = 20.000</span><span id="kmAdim">iter 0</span></div>
+      </div>
+
+      <div class="pen" id="kayipPen" style="left:150px;top:350px">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span>inertia.log</span><span class="serit"></span></div>
+        <canvas id="kayipCiz" width="460" height="168"></canvas>
+        <div class="altbar"><span id="kayipDeger">J = —</span><span>Lloyd</span></div>
+      </div>
+
+      <div class="pen" id="notPen" style="left:34px;top:330px">
+        <div class="bar"><span class="kapa"></span><span class="serit"></span><span id="notAd">oku-beni.txt</span><span class="serit"></span></div>
+        <div class="not" id="notMetin" aria-live="polite" title="bir daha tıkla, bir daha söylensin">Yine mi sen. Bir klasör seç de şu işi bitirelim.</div>
+      </div>
+
+      <div class="ikonlar">
+        <button class="ikon" data-hedef="pk1"><svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><path d="M1 4h12l3 3h17v20H1z" fill="#F7F7F5" stroke="#1E1E1E"/><path d="M1 10h32" stroke="#1E1E1E"/></svg><span>Proje 01</span></button>
+        <button class="ikon" data-hedef="pk2"><svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><path d="M1 4h12l3 3h17v20H1z" fill="#F7F7F5" stroke="#1E1E1E"/><path d="M1 10h32" stroke="#1E1E1E"/></svg><span>Proje 02</span></button>
+        <button class="ikon" data-hedef="pk3"><svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><path d="M1 4h12l3 3h17v20H1z" fill="#F7F7F5" stroke="#1E1E1E"/><path d="M1 10h32" stroke="#1E1E1E"/></svg><span>Proje 03</span></button>
+        <button class="ikon" data-hedef="pk4"><svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true"><path d="M1 4h12l3 3h17v20H1z" fill="#F7F7F5" stroke="#1E1E1E"/><path d="M1 10h32" stroke="#1E1E1E"/></svg><span>Proje 04</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-sag">
+    <div class="bolum-lab" style="text-align:left">Seçili işler</div>
+    <h2>Projeler</h2>
+    <div class="p-kartlar">
+      <article class="p-kart vurgu" id="pk1"><div class="no">01 — staj projesi</div><h3>Pose estimation ile hareket analizi</h3><p>Görüntüden anahtar noktaları çıkaran ve bunların zaman serisi analiziyle hareketteki anormalliği tespit eden bir modelin geliştirilme sürecinin bir parçasıydım. Yaklaşık 10 bin üzeri etiketlenmiş veri; çoklu kamera senkronizasyonu ve homografi matrisleri. Uygulama alanı: büyükbaş hayvanlarda topallık tespiti.</p><div class="etiket"><span>YOLO</span><span>pose estimation</span><span>zaman serisi</span><span>homografi</span></div></article>
+      <article class="p-kart" id="pk2"><div class="no">02 — kişisel proje</div><h3>Re-ID ile çoklu nesne takibi ve davranış analizi</h3><p>Sabit kameralardan birden çok bireyi takip eden, kadrajdan çıksa ya da örtülse de yeniden tanıyan ve davranışını sınıflandıran deep learning tabanlı bir computer vision pipeline'ı. YOLOv11 ile tespit, Triplet Loss ile eğitilmiş Siamese network ile few-shot re-identification, Hungarian matching ile takip, ResNet ile duruş sınıflandırması. Otomatik kayıt, beklenen kapasiteye ulaşınca kilitlenip modeli data drift'e karşı korur.</p><div class="etiket"><span>YOLOv11</span><span>Siamese network</span><span>re-ID</span><span>ResNet</span></div><a class="gh-bag" href="https://github.com/ismetcelenler/BovineVision-AI" target="_blank" rel="noopener"><i class="ik gh" style="--ik:url(ikon/pixelarticons-github.svg)" aria-hidden="true"></i>GitHub — BovineVision-AI</a></article>
+      <article class="p-kart" id="pk3"><div class="no">03 — kişisel proje</div><h3>Kaynağa dayalı RAG ile karar destek</h3><p>Yüksek riskli alanlarda büyük dil modellerinin halüsinasyon riskini azaltan, Türkçe çalışan RAG tabanlı bir karar destek sistemi. Yanıtı güvenilir literatüre dayandırır, üretilen her iddiayı cümle düzeyinde kaynağıyla eşleştirir; çapraz dilli erişimle Türkçe bir soruyu İngilizce literatürle de yanıtlar. Uygulama alanı: veteriner hekimlik.</p><div class="etiket"><span>RAG</span><span>LLM</span><span>hibrit bilgi erişimi</span><span>Python</span></div><a class="gh-bag" href="https://github.com/ismetcelenler/PaytarAI" target="_blank" rel="noopener"><i class="ik gh" style="--ik:url(ikon/pixelarticons-github.svg)" aria-hidden="true"></i>GitHub — PaytarAI</a></article>
+      <article class="p-kart" id="pk4"><div class="no">04 — kişisel proje</div><h3>Çok araçlı AI agent</h3><p>LangChain ve OpenAI GPT-3.5 ile web arama, hesap makinesi, RAG aracılığıyla PDF soru-cevap ve DALL-E 3 görsel üretimi arasından bağımsız seçim yapabilen bir AI asistan. FastAPI backend, agent'ın akıl yürütme sürecini WebSocket aracılığıyla token token frontend'e aktarır; ChromaDB ile vektör araması, her oturum için izole konuşma belleği.</p><div class="etiket"><span>LangChain</span><span>FastAPI</span><span>WebSocket</span><span>Next.js</span></div><a class="gh-bag" href="https://github.com/ismetcelenler/multi-tool-agent" target="_blank" rel="noopener"><i class="ik gh" style="--ik:url(ikon/pixelarticons-github.svg)" aria-hidden="true"></i>GitHub — multi-tool-agent</a></article>
+    </div>
+  </div>
+</section>
+
+<!-- Iletisim: Web3Forms (statik sayfadan calisir, sunucu kodu yok).
+     access_key Web3Forms'un tasarimi geregi herkese acik bir anahtardir;
+     yalniz mesajlarin hangi adrese gidecegini belirler. -->
+<section class="iletisim" id="iletisim">
+  <div class="bolum-lab">İletişim</div>
+  <form class="pen akis mesaj" id="mesaj" action="https://api.web3forms.com/submit" method="POST" novalidate>
+    <div class="bar"><span class="kapa"></span><span class="serit"></span><span>yeni-mesaj</span><span class="serit"></span></div>
+    <input type="hidden" name="access_key" value="d176e072-2de5-49c2-bf42-efde7b5d89fe">
+    <input type="hidden" name="subject" value="Portföy sitesinden yeni mesaj">
+    <input type="hidden" name="from_name" value="Portföy iletişim formu">
+    <!-- honeypot: insan gormez, bot doldurur; dolu gelen mesaji Web3Forms atar -->
+    <input type="checkbox" name="botcheck" class="bal" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="m-ic">
+      <div class="m-satir"><span class="m-et">Kime:</span><span>İsmet Çelenler</span></div>
+      <label class="m-satir"><span class="m-et">Ad:</span><input name="name" autocomplete="name" maxlength="80" required></label>
+      <label class="m-satir"><span class="m-et">E-posta:</span><input name="email" type="email" autocomplete="email" maxlength="120" required></label>
+      <label class="m-govde"><span class="m-et">Mesaj:</span><textarea name="message" rows="6" maxlength="3000" required></textarea></label>
+    </div>
+    <div class="altbar"><span id="mDurum" role="status" aria-live="polite">hazır</span><button type="submit" class="m-gonder"><i class="ik" style="--ik:url(ikon/email-envelope.svg)" aria-hidden="true"></i>Gönder</button></div>
+  </form>
+  <p class="m-yedek">ya da doğrudan: <a href="mailto:ismet.celenler@gmail.com">ismet.celenler@gmail.com</a></p>
+</section>
+<script>
+/* oku-beni.txt: projeleri huysuz, aksi bir eski bilgisayar yorumluyor.
+   Masaustunde bir klasor ya da bir proje karti secilince o projeye dair
+   bir laf daktiloyla yazilir; nota tiklamak ayni projeden baska bir laf
+   soyletir. Ayni laf art arda gelmez. Azaltilmis harekette aninda yazar. */
+(() => {
+  const LAF = {
+    bos: [
+      'Yine mi sen. Bir klasör seç de şu işi bitirelim.',
+      'oku-beni.txt dediler, okudun. Aferin. Şimdi bir proje seç.',
+      'Ben 1984 model bir bilgisayarım. Sabrım da o yıldan kalma.',
+      'Dosyaya tıklamak serbest. Bana tıklamak da serbest ama pişman olursun.'
+    ],
+    pk1: [
+      '10 bin kare etiketlendi. Ben 10 bin kere "bitti mi?" diye sordum. İkimiz de yorulduk.',
+      'Pose estimation: dizin nerede olduğunu benden iyi biliyor.',
+      'Homografi matrisi 3x3. Benim sabrım 1x1.',
+      'Çoklu kamera senkronizasyonu. Kameralar anlaştı, ekip hâlâ toplantıda.',
+      'Anahtar noktaları buluyor. Benim anahtarlarımı bulamadı ama.'
+    ],
+    pk2: [
+      'Re-identification: kadrajdan çıkanı geri tanıyor. Ben seni tanımıyorum, sorun değil.',
+      'Siamese network: iki ikiz ağ. Biri hep haklı çıkıyor, tahmin et hangisi.',
+      'Triplet Loss: üç kişi girdi, biri hep dışlandı. Lise yıllarım gibi.',
+      'Hungarian matching herkese bir eş buluyor. Bana bulamadı.',
+      'Kapasite dolunca kaydı kilitliyor. Keşke gelen kutum da öyle yapsa.'
+    ],
+    pk3: [
+      'Halüsinasyonu azaltan bir sistem. Ben kahvesiz de görüyorum, kimse umursamıyor.',
+      'Her iddiayı kaynağıyla eşleştiriyor. Benim tek kaynağım: "bende çalışıyordu".',
+      'Türkçe soruya İngilizce literatürle cevap veriyor. Ben Türkçe soruyu bile anlamıyorum.',
+      'RAG: Retrieval-Augmented Generation. Ben de Retrieval-Augmented Söylenme yapıyorum.'
+    ],
+    pk4: [
+      'Hesap makinesi aracı var. Yapay zekâ 2+2 için alet çantasını açıyor.',
+      'Cevabı token token akıtıyor. Ben de... böyle... konuşuyorum... kimse... beklemiyor.',
+      'Hangi aracı kullanacağına kendi karar veriyor. Benden daha özgür.',
+      "PDF'e soru sorabiliyorsun. Ben PDF açınca güncelleme indiriyorum.",
+      'GPT-3.5 ile yapılmış. Emekli bir model. Benim gibi. Saygı göster.'
+    ]
+  }
+  const metin = document.getElementById('notMetin'), ad = document.getElementById('notAd')
+  if(!metin) return
+  const yavas = !matchMedia('(prefers-reduced-motion: reduce)').matches
+  let konu = 'bos', son = {}, zaman = null
+  const sec = k => {
+    const l = LAF[k]; let i
+    do i = Math.floor(Math.random() * l.length); while(l.length > 1 && i === son[k])
+    son[k] = i; return l[i]
+  }
+  const yaz = k => {
+    konu = k; clearInterval(zaman)
+    ad.textContent = k === 'bos' ? 'oku-beni.txt' : 'oku-beni.txt — ' + k.slice(2)
+    const t = sec(k)
+    if(!yavas){ metin.textContent = t; return }
+    let n = 0; metin.textContent = ''
+    zaman = setInterval(() => { metin.textContent = t.slice(0, ++n); if(n >= t.length) clearInterval(zaman) }, 28)
+  }
+  document.querySelectorAll('.ikon[data-hedef]').forEach(b => b.addEventListener('click', () => yaz(b.dataset.hedef)))
+  document.querySelectorAll('.p-kart').forEach(k => k.addEventListener('click', e => {
+    if(e.target.closest('a')) return
+    document.querySelectorAll('.p-kart').forEach(x => x.classList.toggle('vurgu', x === k))
+    yaz(k.id)
+  }))
+  metin.addEventListener('click', () => yaz(konu))
+  son.bos = 0
+})()
+</script>
+<script>
+/* Iletisim formu: fetch ile JSON gonderim, sonuc pencerenin durum cubugunda.
+   Ek bot onlemi: sayfa acildiktan sonra 3 s dolmadan gelen gonderim bot sayilir
+   ve sessizce "iletildi" gosterilir (bot tekrar denemesin diye). */
+(() => {
+  const f = document.getElementById('mesaj'), d = document.getElementById('mDurum')
+  const dugme = f.querySelector('.m-gonder'), acilis = Date.now()
+  /* 1. katman tekrar sinirı: bu TARAYICIDA basarili gonderimlerin zamani
+     tutulur (IP degil; gizli sekme ya da veri silme ile asilir, kibarlik
+     siniri). Son gonderimden 10 dk gecmeden ve 24 saatte 3'ten fazla yok. */
+  const KAYIT = 'iletisimGecmisi', BEKLE = 10 * 60e3, GUN = 24 * 3600e3, GUNLUK = 3
+  const gecmis = () => { try { return (JSON.parse(localStorage.getItem(KAYIT)) || []).filter(t => Date.now() - t < GUN) } catch(_) { return [] } }
+  const kaydet = () => { try { localStorage.setItem(KAYIT, JSON.stringify([...gecmis(), Date.now()])) } catch(_) {} }
+  function sinir(){
+    const g = gecmis(); if(!g.length) return ''
+    const kalan = BEKLE - (Date.now() - Math.max(...g))
+    if(kalan > 0) return 'mesajın zaten geldi. ' + Math.ceil(kalan / 60e3) + ' dk sonra yine yazabilirsin'
+    if(g.length >= GUNLUK) return 'bugünlük bu kadar. yarın yine yaz'
+    return ''
+  }
+  const durum = (m, t) => { d.textContent = m; f.dataset.durum = t || '' }
+  f.addEventListener('submit', async e => {
+    e.preventDefault()
+    if(!f.checkValidity()){
+      const ilk = f.querySelector(':invalid'); ilk.focus()
+      durum(ilk.type === 'email' ? 'e-posta adresi geçersiz' : 'boş alan var', 'hata'); return
+    }
+    const engel = sinir(); if(engel){ durum(engel, 'hata'); return }
+    if(Date.now() - acilis < 3000 || f.botcheck.checked){ durum('iletildi ✓', 'tamam'); f.reset(); return }
+    if(f.access_key.value === 'WEB3FORMS_ACCESS_KEY'){ durum('access key henüz eklenmedi', 'hata'); return }
+    dugme.disabled = true; durum('gönderiliyor…')
+    try {
+      const y = await fetch(f.action, { method: 'POST', headers: { Accept: 'application/json' }, body: new FormData(f) })
+      const j = await y.json().catch(() => ({}))
+      if(y.ok && j.success){ kaydet(); durum('iletildi ✓ teşekkürler', 'tamam'); f.reset() }
+      else durum('gönderilemedi, e-postayla yazabilirsin', 'hata')
+    } catch(_) { durum('bağlantı yok, e-postayla yazabilirsin', 'hata') }
+    dugme.disabled = false
+  })
+})()
+</script>
+
+<footer class="atif">İkonlar: <a href="https://www.streamlinehq.com/icons/pixel" target="_blank" rel="noopener">Streamline Pixel</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>) · <a href="https://pixelarticons.com" target="_blank" rel="noopener">Pixelarticons</a> (MIT)</footer>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+  "three/": "https://cdn.jsdelivr.net/npm/three@0.182.0/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three'
+import Parcaciklar from './Parcaciklar.js'
+
+const tuval = document.getElementById('sahne')
+/* Parcacik sistemi kurulamazsa (WebGL2 yok, float hedef yok, GPU hatasi)
+   sayfa yine calismali: html.parcacik hic eklenmez, yazilar gorunur kalir. */
+function yedek(hata){
+  if(hata) console.warn('Parcacik sistemi kapali:', hata)
+  document.documentElement.classList.remove('parcacik')
+  document.getElementById('uyari').classList.add('gorunur')
+  tuval.style.display = 'none'
+}
+let renderer = null
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: tuval, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' })
+} catch(e) { yedek(e) }
+if(renderer){
+  if(!renderer.capabilities.isWebGL2) yedek('WebGL2 yok')
+  else {
+    document.documentElement.classList.add('parcacik')
+    try { baslat() } catch(e) { yedek(e) }
+  }
+}
+
+function baslat(){
+  // Saydam tuval: kutu kenari olusmasin, sayfa zemini dogrudan gorunsun
+  renderer.setClearColor(0x000000, 0)
+  /* Temizlik elle: makas acikken otomatik temizlik yalniz makas icini
+     siler, disarida onceki karelerden parcacik izi kalir. */
+  renderer.autoClear = false
+  const ekranEl = document.getElementById('ekran')
+  const adEl = document.getElementById('ad')
+  const adImza = document.getElementById('adImza')
+  const zamanEl = document.getElementById('zaman')
+  const zCizgi = document.getElementById('zCizgi')
+  const kmEkran = document.getElementById('kmEkran')
+  const projelerEl = document.getElementById('projeler')
+
+  const sahne = new THREE.Scene()
+  const kamera = new THREE.PerspectiveCamera(42, 760/330, 0.1, 100)
+
+  /* Her alanin kendi kamerasi var. Gradyan inisi arazi oldugu icin
+     egik bakilmali, yoksa tepe/vadi okunmaz. */
+  /* Acilis modu. Tek yerde duruyor: kamera baslangici, ilk parcacik sayisi
+     ve ilk alanSec cagrisi hep bunu okuyor. Ayri ayri yazilirsa biri
+     unutulup acilista gorunur bir kayma/yeniden kurulum olusuyor. */
+  const ILK_MOD = 3
+
+  /* Arayuzde gosterilmeyen modlar. Kodlari, shader dallari ve kamera
+     kayitlari yerinde duruyor — yalnizca dugmeleri gizleniyor. Geri acmak
+     icin numarayi bu listeden cikarmak yeterli. ILK_MOD buraya konulmamali,
+     yoksa acilis modunun dugmesi gorunmez olur. */
+  const GIZLI_MODLAR = [2, 4]
+
+  const KAMERA = {
+    0: { poz: new THREE.Vector3(0, 0.15, 3.55), hedef: new THREE.Vector3(0, -0.25, 0) },
+    2: { poz: new THREE.Vector3(0, 0, 3.75), hedef: new THREE.Vector3(0, 0, 0) },
+    // tam yandan: kamera modelin merkeziyle ayni yukseklikte (Reis, 2026-09-23;
+    // onceden 0.78 yukseklikten ~8 derece asagi bakiyordu). Uzaklik ayni: 5.40
+    3: { poz: new THREE.Vector3(0, 0.04, 5.40), hedef: new THREE.Vector3(0, 0.04, 0) },
+    4: { poz: new THREE.Vector3(0, 0.02, 3.10), hedef: new THREE.Vector3(0, 0.02, 0) },
+    5: { poz: new THREE.Vector3(0, -0.32, 4.75), hedef: new THREE.Vector3(0, -0.32, 0) }
+  }
+  const kamPoz = KAMERA[ILK_MOD].poz.clone(), kamHedef = KAMERA[ILK_MOD].hedef.clone()
+
+  let sis = null, renkSecim = ['#FFD23A', '#4A7BFF'], boyut = 0.17, alan = ILK_MOD
+  let akis = 1, adBoyut = 2.2
+  /* sekilNokta[i]: i. istasyonun hedef pikselleri (kutusuna gore).
+     heroMod: ziyaretcinin hero'da sectigi mod; projelerden donuste geri gelir. */
+  const sekilNokta = []
+  let heroMod = ILK_MOD
+
+  /* ---- Alani okunur kilan yardimci geometriler ----
+     Parcacik tek basina bir araziyi anlatamaz; yuzeyin kendisi gorunmeli. */
+
+  // kayip yuzeyi — shader'daki kayip() ile AYNI formul olmak zorunda
+
+
+  // XZ duzleminde ince bir halka: k-ortalama merkez isaretleri icin
+  function halka(yaricap, renk, gucu){
+    const n = 40, v = []
+    for(let i = 0; i <= n; i++){
+      const a = i/n * Math.PI * 2
+      v.push(Math.cos(a)*yaricap, 0, Math.sin(a)*yaricap)
+    }
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3))
+    return new THREE.Line(g, new THREE.LineBasicMaterial({ color: renk, transparent: true, opacity: gucu }))
+  }
+
+  // 2B kesit egrisi — shader'daki kesitKayip() ile AYNI formul olmak zorunda
+  const kesitKayip = x =>
+      0.045 * x * x
+    - 0.52 * Math.exp(-4.2 * (x - (-2.95)) ** 2)
+    - 0.70 * Math.exp(-4.6 * (x - (-1.55)) ** 2)
+    - 0.58 * Math.exp(-4.4 * (x - (-0.15)) ** 2)
+    - 1.45 * Math.exp(-3.2 * (x - (1.30)) ** 2)
+    - 0.62 * Math.exp(-4.8 * (x - (2.80)) ** 2)
+  const kesitGeo = new THREE.BufferGeometry()
+  {
+    const v = []
+    for(let x = -3.75; x <= 3.75; x += 0.012) v.push(x, kesitKayip(x), 0)
+    kesitGeo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3))
+  }
+  const kesit = new THREE.Line(kesitGeo, new THREE.LineBasicMaterial({
+    color: 0x9AA2AE, transparent: true, opacity: 0.75
+  }))
+  kesit.visible = false
+  sahne.add(kesit)
+
+  /* k-ortalama: veri GPU'da sabit duruyor, merkezleri CPU'da Lloyd ile hesapla.
+     Shader'daki yiginNoktasi() ile AYNI yigin merkezleri kullanilmak zorunda. */
+  const YIGIN = [[-1.55,0.62], [1.42,0.78], [-0.95,-0.82], [1.05,-0.70], [0.10,0.05]]
+  const K = 5
+  const veri = []
+  for(let i = 0; i < 1800; i++){
+    const c = YIGIN[Math.floor(Math.random()*YIGIN.length)]
+    veri.push([ c[0] + (Math.random()+Math.random()-1)*0.62,
+                c[1] + (Math.random()+Math.random()-1)*0.62 ])
+  }
+  const KUME_RENK = [0xFFD23A, 0x4A7BFF, 0x7DF9C4, 0xFF7A6B, 0xA78BFA]
+  let merkez = [], merkezHedef = [], merkezIsaret = new THREE.Group()
+  /* Projeler penceresi icin gercek olcumler: iterasyon sayisi ve inertia
+     (her noktanin merkezine uzakliginin karesi, toplam). Grafik uydurma
+     degil, bu yinelemeden geliyor. */
+  let kmIter = 0, kmGecmis = [], kmYakinsadi = -1
+  function merkezSifirla(){
+    kmIter = 0; kmGecmis = []; kmYakinsadi = -1
+    merkez = []; merkezHedef = []
+    merkezIsaret.clear()
+    for(let i = 0; i < K; i++){
+      const m = new THREE.Vector3((Math.random()-0.5)*3.6, (Math.random()-0.5)*2.2, 0)
+      merkez.push(m); merkezHedef.push(m.clone())
+      const h = halka(0.16, KUME_RENK[i], 0.95); h.rotation.x = Math.PI/2
+      merkezIsaret.add(h)
+    }
+  }
+  function lloydAdim(){
+    const toplam = Array.from({length:K}, () => [0,0,0])
+    let J = 0
+    for(const [x,y] of veri){
+      let en = 1e9, k = 0
+      for(let i = 0; i < K; i++){
+        const d = (x-merkez[i].x)**2 + (y-merkez[i].y)**2
+        if(d < en){ en = d; k = i }
+      }
+      J += en
+      toplam[k][0] += x; toplam[k][1] += y; toplam[k][2]++
+    }
+    let kayma = 0
+    for(let i = 0; i < K; i++){
+      if(toplam[i][2] > 0){
+        const nx = toplam[i][0]/toplam[i][2], ny = toplam[i][1]/toplam[i][2]
+        kayma = Math.max(kayma, Math.hypot(nx - merkezHedef[i].x, ny - merkezHedef[i].y))
+        merkezHedef[i].set(nx, ny, 0)
+      }
+    }
+    kmIter++; kmGecmis.push(J)
+    return kayma
+  }
+  merkezSifirla()
+  let sonLloyd = 0
+
+  // islem hatti kapilari — asamalarin nerede bittigi gorunsun
+  const kapiGeo = new THREE.BufferGeometry()
+  {
+    const v = [], xs = [-1.15, -0.15, 0.95]
+    for(const x of xs){ v.push(x, -1.15, 0,  x, 1.15, 0) }
+    kapiGeo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3))
+  }
+  const kapilar = new THREE.LineSegments(kapiGeo, new THREE.LineBasicMaterial({
+    color: 0x6E7681, transparent: true, opacity: 0.30
+  }))
+  kapilar.visible = false
+  sahne.add(kapilar)
+
+  /* Moda ozel parcacik sayisi. Cekicinin yapisi ince bir yuzey uzerinde
+     dagiliyor: 10 binde nokta bulutu seyrek kaliyor, sekil okunmuyor.
+     Arazi ve kesit modlari 10 binde zaten dolu. Panelden secim yapilirsa
+     o secim her modda gecerli olur (elleSayi). */
+  /* k-means de 40 bin: projeler istasyonuna geciste adet degisirse sistem
+     yeniden kurulur, bu da gorunur bir takilma demek. */
+  /* Dokunmatik ya da dar ekran (telefon, tablet): GPU zayif olabilir, adet yarim. */
+  const HAFIF = matchMedia('(pointer: coarse), (max-width: 900px)').matches
+  const MOD_SAYI = HAFIF ? { 3: 20000, 2: 20000 } : { 3: 40000, 2: 40000 }
+  let elleSayi = null, mevcutAdet = 0
+
+  function kur(adet){
+    if(sis){ sahne.remove(sis.mesh); sis.dispose() }
+    mevcutAdet = adet
+    sis = new Parcaciklar(renderer, adet)
+    sis.ayarla('colorIn', renkSecim[0]); sis.ayarla('colorOut', renkSecim[1])
+    sis.ayarla('size', boyut)
+    sahne.add(sis.mesh)
+    sis.material.uniforms.uAkis.value = akis
+    sis.material.uniforms.uAdPx.value = adBoyut
+    sekilNokta.forEach((sn, i) => { if(sn) sis.sekilKur(i, sn.pts, sn.en) })   // yeni adet: hedefler yeniden dagitilir
+    renderer.compile(sahne, kamera)      // ilk kare shader derlemesini one al
+  }
+  kur(MOD_SAYI[ILK_MOD] || 10000)
+
+  let W = 1, H = 1
+  function boyutla(){
+    W = tuval.clientWidth; H = tuval.clientHeight
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2))
+    renderer.setSize(W, H, false)
+  }
+  let adZaman = 0, sonEn = 0
+  boyutla(); sonEn = W
+  addEventListener('resize', () => {
+    boyutla()
+    /* Mobilde adres cubugu gizlenip gorundukce yalniz yukseklik degisir;
+       sekiller (ad, zaman cizgisi) o zaman degismez, yeniden orneklemeye gerek yok. */
+    if(W === sonEn) return
+    sonEn = W
+    clearTimeout(adZaman); adZaman = setTimeout(sekilleriOrnekle, 200)
+  })
+
+  /* Kamera her karede .ekran kutusuna gore kurulur. Bakis acisi o kutunun
+     en-boy orani; tam ekran tuval kutunun disina tasan "genis bir pencere"
+     gibi calisir (negatif ofsetli setViewOffset). Sonuc: model eski yerinde,
+     eski boyutunda — ama geciste disari cikabilir. */
+  function kameraKutuya(k){
+    kamera.setViewOffset(k.width, k.height, -k.left, -k.top, W, H)
+  }
+  /* Cekici modelin kutusundan dikeyde tasiyor ve makas onu kesiyordu. .ekran
+     artik modelin kutusundan ALAN_PAY kat yuksek: kamera ortadaki model
+     kutusuna oturur (model ayni boyutta, ayni yerde), makas buyuk kutuya.
+     CSS'teki en-boy oranlari (760/462, 20/21) bu katsayiyla birlikte. */
+  const ALAN_PAY = 1.4
+  /* Pay asimetrik: cekici ustten ~10 px, alttan ~70 px tasiyor (alttaki yogun
+     halka kameraya yakin, parcaciklari buyuk ve haleleri genis). Olculdu
+     (2026-09-23, 60 fps adimla): toplam payin %26'si ustte, %74'u altta. */
+  const UST_PAY = 0.26
+  function modelKutusu(k){
+    const pay = k.height * (1 - 1 / ALAN_PAY)
+    return { left: k.left, top: k.top + pay * UST_PAY, width: k.width, height: k.height - pay }
+  }
+
+  /* Adin pikselleri: imza SVG'si, gorunmez img'nin ekrandaki kutusuna
+     birebir 2B tuvale cizilir, dolu pikseller hedef olur. Devirde parcacik
+     imza ile gercek imza ust uste biner, gorunur olurken ziplamaz. */
+  function pikseller(c, w, h){
+    const v = c.getImageData(0, 0, w, h).data, pts = []
+    for(let y = 0; y < h; y++) for(let i = 0; i < w; i++)
+      if(v[(y * w + i) * 4 + 3] > 140) pts.push(i + 0.5, y + 0.5)
+    return new Float32Array(pts)
+  }
+  function tuval2B(w, h){
+    const c = document.createElement('canvas'); c.width = w; c.height = h
+    return c.getContext('2d', { willReadFrequently: true })
+  }
+  async function adOrnekle(){
+    try { await adImza.decode() } catch(e) {}
+    const r = adEl.getBoundingClientRect(), k = adImza.getBoundingClientRect()
+    const w = Math.ceil(r.width), h = Math.ceil(r.height)
+    const x = tuval2B(w, h)
+    x.drawImage(adImza, k.left - r.left, k.top - r.top, k.width, k.height)
+    const pts = pikseller(x, w, h)
+    sekilNokta[1] = { pts, en: w }
+    sis.sekilKur(1, pts, w)
+  }
+
+  /* Zaman cizgisi: DOM'daki cizgi dugumlerin gercek merkezlerinden kurulur,
+     parcacik sekli de ayni merkezlerden cizilir. Ikisi ayni geometri. */
+  function zamanOrnekle(){
+    const r = zamanEl.getBoundingClientRect()
+    const d = [...zamanEl.querySelectorAll('.dugum')].map(e => {
+      const k = e.getBoundingClientRect()
+      return { x: k.left + k.width / 2 - r.left, y: k.top + k.height / 2 - r.top }
+    })
+    zCizgi.style.left = d[0].x + 'px'
+    zCizgi.style.width = (d[d.length - 1].x - d[0].x) + 'px'
+    const w = Math.ceil(r.width), h = Math.ceil(r.height)
+    const x = tuval2B(w, h)
+    x.fillStyle = x.strokeStyle = '#fff'
+    x.fillRect(d[0].x, d[0].y - 1.5, d[d.length - 1].x - d[0].x, 3)
+    for(const n of d){
+      x.clearRect(n.x - 12, n.y - 12, 24, 24)          // halkanin ici bos (DOM'daki bosluk)
+      x.beginPath(); x.arc(n.x, n.y, 7, 0, Math.PI * 2); x.fill()
+      x.lineWidth = 2; x.beginPath(); x.arc(n.x, n.y, 13, 0, Math.PI * 2); x.stroke()
+    }
+    const pts = pikseller(x, w, h)
+    sekilNokta[2] = { pts, en: w }
+    sis.sekilKur(2, pts, w)
+  }
+  async function sekilleriOrnekle(){ zamanOrnekle(); await adOrnekle() }
+
+  const fare = new THREE.Vector2(0, 0)
+  addEventListener('pointermove', e => {
+    const k = ekranEl.getBoundingClientRect()
+    fare.x = ((e.clientX - k.left) / k.width) * 2 - 1
+    fare.y = -(((e.clientY - k.top) / k.height) * 2 - 1)
+  })
+
+  const ALAN = {
+    2: { ad:'k-means',   formul:'argmin Σ ‖xᵢ − μⱼ‖²', param:'k = 5' },
+    3: { ad:'Aizawa attractor', formul:'ẋ = (z−b)x − dy,  ẏ = dx + (z−b)y,  ż = c + az − z³⁄3 − (x²+y²)(1+ez) + fzx³', param:'a=0.95 b=0.7 c=0.6 d=3.5 e=0.25 f=0.1' },
+    4: { ad:'Lorenz attractor', formul:'ẋ = σ(y−x),  ẏ = x(ρ−z)−y,  ż = xy−βz', param:'σ=10 ρ=28 β=8/3' },
+    5: { ad:'Gradient descent', formul:'θ ← θ − η L′(θ)', param:'η = 0.9' },
+    0: { ad:'Çeşme 1.0',         formul:'v ← v + g·Δt,  v↓ ← −v(1−d)', param:'g = −0.5' }
+  }
+
+  function alanSec(n, sessiz){
+    alan = n
+    const istenenAdet = elleSayi || MOD_SAYI[n] || 10000
+    if(istenenAdet !== mevcutAdet) kur(istenenAdet)
+    sis.ayarla('uMod', n)
+    /* Gradyanda parcacik ancak bir minimuma oturunca yeniden dogar. Yeni
+       kurulan sistemde parcaciklar ekran disinda (0, 99999) bekliyor; egriye
+       ceken yay bu mesafeyi dev bir hiza ceviriyor, parcacik egriye carpip
+       x=0'da dikey bir sutun halinde firliyordu (olculdu: 2125 parcacik, y=400'e
+       kadar). Hepsi egrinin sol ucundan bastan dogsun: ogrenme orani
+       degisince yapilanla ayni. */
+    if(n === 5) sis.sifirla()
+    kesit.visible = (n === 5)
+    kapilar.visible = false
+    /* Toplamali karisimda cekirdek alfasi yuksek olunca renk beyaza patliyor.
+       Kume rengi okunsun diye k-ortalamada kisiyoruz. */
+    sis.ayarla('solidAlpha', n === 2 ? 1.15 : 5)
+    sis.ayarla('glowSpread', n === 2 ? 0.012 : 0.02)
+    sis.ayarla('sparklingAlpha', n === 2 ? 0 : 4)
+    /* Iz uzatmasi kapali. Difuzyondan miras kalan uIz=1.6 orada hiz sifir
+       oldugu icin hic calismamisti; Aizawa'da hiz gercek (ortalama 1.5
+       birim/s) ve ayni katsayi parcacigi 3.4-8 katina uzatip sekli
+       okunmaz seritlere ceviriyordu. Cekici ince noktalarla okunuyor. */
+    sis.ayarla('uIz', 0)
+    // moda gore boyut: k-ortalamada ince, cekici ve arazide tam
+    sis.ayarla('size', n === 2 ? boyut * 0.45 : boyut)
+    if(n === 0){
+      sis.ayarla('initialVelocity', new THREE.Vector3(0, 1.9, 0))
+      sis.ayarla('initialRandomVelocity', 0.22)
+      sis.ayarla('gravity', new THREE.Vector3(0, -1.7, 0))
+      sis.ayarla('floorDamping', 0.72)
+      sis.ayarla('emitterVelocityStrength', 0)
+      sis.ayarla('decayFrequency', 0.22)
+    } else {
+      /* Cekicide omur uzun olmali: parcacik sekli cizecek kadar dolasmadan
+         olurse yapi hic okunmuyor. */
+      sis.ayarla('decayFrequency', n === 3 ? 0.05 : 0.06)
+    }
+    if(sessiz) return
+    lrKutu.hidden = n !== 5
+    const b = ALAN[n]
+    document.getElementById('simAd').textContent = b.ad
+    document.querySelectorAll('#alanlar button').forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.a === String(n) ? 'true' : 'false'))
+  }
+  const lrKutu = document.getElementById('lrKutu')
+  lrKutu.addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return
+    lrKutu.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed','false'))
+    b.setAttribute('aria-pressed','true')
+    sis.ayarla('uOgrenme', parseFloat(b.dataset.l))
+    /* Mevcut konumlarindan devam etmeleri yaniltici olurdu: yeni oran
+       eski yolculugun sonucunu degistirmez. Hepsi bastan baslasin. */
+    sis.sifirla()
+  })
+
+  document.getElementById('alanlar').addEventListener('click', e => {
+    // ogrenme orani dugmeleri de bu listenin icinde: yalniz mod dugmeleri
+    const b = e.target.closest('button[data-a]'); if(!b) return
+    const n = parseInt(b.dataset.a, 10)
+    // secili gradient descent'e tekrar basmak kutuyu acar/kapar
+    if(n === 5 && alan === 5){ lrKutu.hidden = !lrKutu.hidden; return }
+    heroMod = n; alanSec(heroMod)
+  })
+
+  // performans korumasi
+  let aktif = !document.hidden
+  document.addEventListener('visibilitychange', () => { aktif = !document.hidden; sonT = performance.now() })
+  const azHareket = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const hepCiz = false
+
+  let sonT = performance.now(), t0 = performance.now(), birikim = 0, sayac = 0, enKotu = 0
+
+  /* ---- Istasyonlar (yolculuk BIR KEZ) ----
+     0 hero (canli) -> 1 ad (sekil) -> 2 zaman cizgisi (sekil).
+     Ilk asagi kaydiriste parcaciklar sirayla gider, sekle varinca soner ve
+     yerini gercek DOM'a birakir. Sonrasinda yazilar sabit kalir, yukari
+     kaydirmak hicbir seyi geri oynatmaz. Sayfanin en ustune donulunce
+     parcaciklar o an neredeyse oradan (asagidan) hero'ya suzulur; yolculuk
+     biter, bir daha oynamaz. */
+  const ISTASYON = [
+    { canli: true,  kutu: ekranEl },
+    { canli: false, kutu: adEl,    dom: adEl },
+    { canli: false, kutu: zamanEl, dom: zamanEl }
+  ]
+  const SON = ISTASYON.length - 1
+  /* ---- Kaydirma yalniz TETIKLER ----
+     Bir istasyonun ust kenari ekranin alt %10'una girdigi an o istasyon
+     hedef olur. Yolculugun kendisi zamana bagli: kaydirma hizindan bagimsiz,
+     her bolum `sure` saniye (zaman cizgisi 1.5 kati, orada dugumler tek tek
+     doluyor). Hizli kaydiran ziyaretci istasyon atlatamaz: hedefler sirayla
+     islenir, ara istasyonda kisa bir duraklamadan sonra zincir devam eder. */
+  const TETIK = 0.9                 // ekran yuksekliginin orani
+  const ARA_BEKLE = 0.25            // zincirde ara istasyonda duraklama (s)
+  const YAZI_ONCE = 0.5             // gercek yazi varistan bu kadar once belirir (s)
+  const SONME = 0.3                 // varistan sonra parcaciklarin sonme suresi (s)
+  let gecis = 0, goster = 0, bekle = 0   // gecis: hedef istasyon (yalniz artar)
+  /* Azaltilmis hareket isteyen ziyaretciye yolculuk oynatilmaz: yazilar ve
+     kartlar dogrudan acilir, hero modeli yerinde calisir. */
+  let donus = null, yolculukBitti = matchMedia('(prefers-reduced-motion: reduce)').matches
+  let gorunur = 1, sure = 3
+  const bolumSuresi = b => sure * (b === 1 ? 1.5 : 1)
+  function kaydirmaGuncelle(dt){
+    if(donus){
+      donus.p = Math.min(1, donus.p + dt / sure)
+      if(donus.p >= 1){ donus = null; goster = gecis = 0; yolculukBitti = true }
+      return
+    }
+    if(yolculukBitti) return
+    if(scrollY <= 2 && goster > 0){
+      /* En uste donuldu: parcaciklar bulunduklari sekilden hero'ya suzulur.
+         Ad-hero arasindaysa ayni yoldan geri. */
+      if(goster >= 1){ donus = { k: Math.round(goster), p: 0 }; gecis = 0; return }
+      gecis = 0
+      goster = Math.max(0, goster - dt / bolumSuresi(0))
+      return
+    }
+    for(let i = gecis + 1; i <= SON; i++){
+      if(ISTASYON[i].kutu.getBoundingClientRect().top < H * TETIK) gecis = i
+    }
+    if(goster >= gecis) return
+    if(bekle > 0){ bekle -= dt; return }
+    const bol = Math.floor(goster)
+    const once = goster
+    goster = Math.min(gecis, bol + 1, goster + dt / bolumSuresi(bol))
+    // ara istasyona vardi ve zincir devam edecek: kisa duraklama
+    if(Math.floor(goster) > Math.floor(once) && goster < gecis) bekle = ARA_BEKLE
+  }
+
+  /* Zaman cizgisi kartlari: dolum cephesi bir dugume vardiginda o dugumun
+     karti acilir. Parcacigin varis ani: f = gecikme*Y + (1-Y); dugumun
+     gecikmesi x konumundan (sekilKur ile ayni formul). */
+  const YAYILMA_ZAMAN = 0.85
+  const kartEl = [...document.querySelectorAll('.deneyim .kart')]
+  const dugumEl = [...zamanEl.querySelectorAll('.dugum')]
+  function kartlariGuncelle(){
+    const zr = zamanEl.getBoundingClientRect()
+    dugumEl.forEach((d, i) => {
+      const k = d.getBoundingClientRect()
+      const nx = (k.left + k.width / 2 - zr.left) / zr.width
+      const esik = (nx * 0.92 + 0.04) * YAYILMA_ZAMAN + (1 - YAYILMA_ZAMAN)
+      const ac = yolculukBitti || goster >= SON - 0.002 || (goster > 1 && goster - 1 >= esik)
+      if(ac) kartEl[i].classList.add('acik')
+    })
+  }
+
+  /* ---- Proje penceresi: kendi kucuk parcacik sistemi ----
+     Ana parcaciklar yolculugu yapiyor; pencere ayni anda k-means gostermeli.
+     Tek grup iki yerde duramayacagi icin pencereye ayri, 20 binlik bir
+     k-means veriliyor. Yalniz pencere ekrandayken calisir. */
+  const sahne2 = new THREE.Scene()
+  const kamera2 = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
+  kamera2.position.copy(KAMERA[2].poz); kamera2.lookAt(KAMERA[2].hedef)
+  sahne2.add(merkezIsaret)
+  const sis2 = new Parcaciklar(renderer, HAFIF ? 10000 : 20000)
+  sis2.ayarla('uMod', 2)
+  sis2.ayarla('colorIn', renkSecim[0]); sis2.ayarla('colorOut', renkSecim[1])
+  sis2.ayarla('size', boyut * 0.45)
+  sis2.ayarla('solidAlpha', 1.15); sis2.ayarla('glowSpread', 0.012)
+  sis2.ayarla('sparklingAlpha', 0); sis2.ayarla('decayFrequency', 0.06)
+  sis2.sifirla()
+  sahne2.add(sis2.mesh)
+
+  // Masaustu: saat, kayip grafigi
+  const saatEl = document.getElementById('saat'), kmAdimEl = document.getElementById('kmAdim')
+  const kayipEl = document.getElementById('kayipDeger'), kayipCiz = document.getElementById('kayipCiz').getContext('2d')
+  function masaustuCiz(){
+    const d = new Date()
+    saatEl.textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0')
+    kmAdimEl.textContent = 'iter ' + kmIter
+    const g = kmGecmis, c = kayipCiz, w = 460, h = 168
+    c.fillStyle = '#F7F7F5'; c.fillRect(0, 0, w, h)
+    c.strokeStyle = 'rgba(30,30,30,.18)'; c.lineWidth = 2
+    for(let y = 24; y < h; y += 36){ c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke() }
+    if(g.length > 1){
+      const mx = g[0], mn = Math.min(...g), yer = v => 14 + (1 - (v - mn) / Math.max(1e-9, mx - mn)) * (h - 28)
+      c.strokeStyle = '#1E1E1E'; c.lineWidth = 4; c.beginPath()
+      g.forEach((v, i) => { const x = 12 + i / Math.max(1, g.length - 1) * (w - 24); i ? c.lineTo(x, yer(v)) : c.moveTo(x, yer(v)) })
+      c.stroke()
+      c.fillStyle = '#1E1E1E'
+      g.forEach((v, i) => { const x = 12 + i / Math.max(1, g.length - 1) * (w - 24); c.fillRect(x - 4, yer(v) - 4, 8, 8) })
+      kayipEl.textContent = 'J = ' + g[g.length - 1].toFixed(1)
+    }
+  }
+  setInterval(masaustuCiz, 500)
+
+  function dongu(){
+    // Arka plan sekmesinde rAF hic atesleme yapmaz; test bayragi zamanlayiciya duser.
+    if(hepCiz) setTimeout(dongu, 16); else requestAnimationFrame(dongu)
+    if(!hepCiz && !aktif){ sonT = performance.now(); return }
+    kare()
+  }
+  function kare(){
+    const simdi = performance.now()
+    const dt = Math.min((simdi - sonT)/1000, 0.05); sonT = simdi
+    const t = (simdi - t0)/1000
+
+    kaydirmaGuncelle(dt)
+
+    /* Sekil istasyonlarinin DOM'u: bir kez acildi mi acik kalir */
+    /* Sekil istasyonlarinin DOM'u varisin son YAZI_ONCE saniyesinde belirir:
+       gec varan parcaciklarin biraktigi delikleri gercek yazi doldurur.
+       Bir kez acildi mi acik kalir. */
+    ISTASYON.forEach((ist, i) => {
+      if(!ist.dom) return
+      const esik = i - YAZI_ONCE / bolumSuresi(i - 1)
+      if(yolculukBitti || goster >= esik) ist.dom.classList.add('acik')
+    })
+    kartlariGuncelle()
+
+    const k0 = performance.now()
+    renderer.setScissorTest(false)
+    renderer.clear()
+    anaCiz(dt, t)
+    pencereCiz(dt, t)
+    const gecen = performance.now() - k0
+
+    birikim += gecen; sayac++; if(gecen > enKotu) enKotu = gecen
+    if(sayac >= 30){
+      birikim = 0; sayac = 0; enKotu = 0
+    }
+  }
+
+  function anaCiz(dt, t){
+    const ek = ekranEl.getBoundingClientRect()
+    let a, b, f, yay
+    if(donus){ a = donus.k; b = 0; f = donus.p; yay = 0.45 }
+    else {
+      const bol = Math.min(Math.floor(goster), SON - 1)
+      a = bol; b = bol + 1; f = goster - bol; yay = bol === 1 ? YAYILMA_ZAMAN : 0.45
+    }
+    const A = ISTASYON[a], B = ISTASYON[b]
+
+    const yakin = Math.round(goster)
+    const sekildeDuruyor = !donus && goster === yakin && gecis === yakin && !ISTASYON[yakin].canli
+    const hedefG = sekildeDuruyor ? 0 : 1
+    gorunur += Math.sign(hedefG - gorunur) * Math.min(Math.abs(hedefG - gorunur), dt / SONME)
+    /* Tamamen devredildi: ana parcaciklar durur */
+    if(hedefG === 0 && gorunur <= 0) return
+    /* Hero ekran disinda ve yolculuk yok: cizecek (ve hesaplayacak) bir sey yok */
+    if(!donus && goster === 0 && (ek.bottom < 0 || ek.top > H)) return
+
+    kameraKutuya(modelKutusu(ek))
+    const u = sis.material.uniforms
+    sis.bolum(a, b, A.canli, B.canli)
+    if(!A.canli){ const k = A.kutu.getBoundingClientRect(); u.uKutuA.value.set(k.left, k.top) }
+    if(!B.canli){ const k = B.kutu.getBoundingClientRect(); u.uKutuB.value.set(k.left, k.top) }
+    u.uF.value = f
+    u.uYayilma.value = yay
+    u.uEkran.value.set(W, H)
+    u.uZamanV.value = t
+    u.uGorunur.value = gorunur
+
+    /* Makas: hero'dayken cizim .ekran kutusuyla sinirli; hero'dan
+       uzaklastikca tam ekrana acilir (donuste ters yonde kapanir). */
+    const uzak = donus ? 1 - donus.p : goster
+    const a0 = Math.min(1, uzak / 0.15), ac = a0 * a0 * (3 - 2 * a0)
+    kesit.material.opacity = 0.75 * (1 - ac)
+
+    const hedefK = KAMERA[alan]
+    kamPoz.lerp(hedefK.poz, 0.045)
+    kamHedef.lerp(hedefK.hedef, 0.045)
+    kamera.position.copy(kamPoz)
+    kamera.lookAt(kamHedef)
+    if(alan === 0) sis.emitterPosition.set(0, -0.9, 0)
+    else if(!azHareket) sis.emitterPosition.lerp(new THREE.Vector3(fare.x*1.6, fare.y*0.9, 0), 0.10)
+
+    sis.update(dt, t)
+    const sx = ek.left * (1 - ac), sy = (H - ek.bottom) * (1 - ac)
+    const sw = ek.width + (W - ek.width) * ac, sh = ek.height + (H - ek.height) * ac
+    renderer.setScissor(sx, sy, sw, sh)
+    renderer.setScissorTest(true)
+    renderer.render(sahne, kamera)
+    renderer.setScissorTest(false)
+  }
+
+  function pencereCiz(dt, t){
+    const k = kmEkran.getBoundingClientRect()
+    if(k.bottom < 0 || k.top > H) return
+    kamera2.setViewOffset(k.width, k.height, -k.left, -k.top, W, H)
+    if(t - sonLloyd > 0.75){                                   // Lloyd yinelemesi
+      sonLloyd = t
+      if(kmYakinsadi < 0){ if(lloydAdim() < 1e-4) kmYakinsadi = t }
+      /* Yakinsadiktan 6 s sonra yeni rastgele merkezlerle bastan: pencere
+         canli kalsin, algoritma her seferinde yeniden calissin. */
+      else if(t - kmYakinsadi > 6) merkezSifirla()
+    }
+    for(let i = 0; i < K; i++){
+      merkez[i].lerp(merkezHedef[i], 1 - Math.exp(-4.5*dt))
+      merkezIsaret.children[i].position.set(merkez[i].x, merkez[i].y, 0.02)
+    }
+    sis2.merkezler(merkez)
+    sis2.update(dt, t)
+    renderer.setScissor(k.left, H - k.bottom, k.width, k.height)
+    renderer.setScissorTest(true)
+    renderer.render(sahne2, kamera2)
+    renderer.setScissorTest(false)
+  }
+  dongu()
+  GIZLI_MODLAR.forEach(n => {
+    const d = document.querySelector('#alanlar button[data-a="' + n + '"]')
+    if(d) d.hidden = true
+  })
+  alanSec(ILK_MOD)
+  sekilleriOrnekle()
+
+  /* Pencereler basliktan surüklenir; tiklanan one gelir. Parcacik penceresi
+     tasininca kamera da onunla gider (kutu her karede okunuyor). */
+  let ust = 10
+  document.querySelectorAll('#masaustu .pen').forEach(pen => {
+    const bar = pen.querySelector('.bar')
+    pen.addEventListener('pointerdown', () => { pen.style.zIndex = ++ust })
+    bar.addEventListener('pointerdown', e => {
+      const m = document.getElementById('masaustu').getBoundingClientRect()
+      const ox = e.clientX - pen.offsetLeft, oy = e.clientY - pen.offsetTop
+      bar.setPointerCapture(e.pointerId)
+      const tasi = ev => {
+        const x = Math.min(Math.max(ev.clientX - ox, 0), m.width - 40)
+        const y = Math.min(Math.max(ev.clientY - oy, 22), m.height - 22)
+        pen.style.left = x + 'px'; pen.style.top = y + 'px'
+      }
+      bar.addEventListener('pointermove', tasi)
+      bar.addEventListener('pointerup', () => bar.removeEventListener('pointermove', tasi), { once: true })
+    })
+  })
+  document.querySelectorAll('.ikon').forEach(b => b.addEventListener('click', () => {
+    const k = document.getElementById(b.dataset.hedef)
+    k.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    document.querySelectorAll('.p-kart').forEach(x => x.classList.toggle('vurgu', x === k))
+  }))
+
+}
+</script>
+</body>
+</html>

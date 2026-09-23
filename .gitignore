@@ -1,0 +1,6 @@
+# Geliştirme taslakları, yedekler ve denemeler: yayına girmez
+drafts/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
