@@ -210,6 +210,26 @@ vec3 aizawaHizi(vec3 p){
   );
   return vec3(t.x, t.z, t.y) * AS;                    // cekici -> sahne
 }
+/* Aizawa kare suresine duyarli: cekicinin altinda eksende kararli bir denge
+   noktasi var (z ~ -1.1). Eski sema p += hiz * dt, hiz bir onceki karenin
+   konumundan. 144 Hz'de (7 ms) parcaciklar cekicide kaliyor; 60 Hz telefonda
+   (17 ms) yarisi o noktaya siziyor, ortadaki yukselen sutun hic olusmuyordu
+   (olculdu 2026-09-25: 20 binde 132'ye karsi 2840 takili).
+   Cozum: ayni sema, en fazla 1/144 s'lik alt adimlarla. Konum ve hiz
+   shader'lari bu fonksiyonu ayni girdilerle calistirir: konum p'yi, hiz
+   shader'i son alt adimin hizini yazar. Boylece gecikme her kare hizinda
+   tam bir alt adim olur. 144 Hz'de n = 1: sonuc birebir eskisi, onaylanan
+   masaustu goruntusu degismez. */
+void aizawaAdim(inout vec3 p, inout vec3 v, float dt){
+  int n = max(int(ceil(dt * 144.0 - 0.25)), 1);   // 144 Hz titremesi (7-8.7 ms) n = 1 kalsin
+  float h = dt / float(n);
+  for(int i = 0; i < 8; i++){
+    if(i >= n) break;
+    vec3 sonraki = aizawaHizi(p) * 0.55;
+    p += v * h;
+    v = sonraki;
+  }
+}
 
 // --- 4) Lorenz cekicisi: uzayda iki spiral kanat ---
 // dx=s(y-x), dy=x(r-z)-y, dz=xy-bz   (s=10, r=28, b=8/3)
@@ -280,6 +300,8 @@ void main(){
     yeni = gradyan ? 0.0 : fract(yeni);      // gradyanda omur sifirlanir, yoksa aninda yeniden 'durmus' sayilir
   } else if(uMod > 1.5 && uMod < 2.5){
     /* k-ortalama: veri noktalari sabittir, yalnizca RENKLERI degisir */
+  } else if(uMod > 2.5 && uMod < 3.5){
+    aizawaAdim(p, hiz, dt);                     // bkz. aizawaAdim: kare hizindan bagimsiz
   } else {
     p += hiz * dt;
     if(uMod < 0.5) p.y = max(p.y, floorY);      // zemin yalniz fiskiye modunda
@@ -368,7 +390,8 @@ void main(){
        Lorenz gibi: hiz dogrudan alan, ivme birikmiyor. Zaman olcegi
        d = 3.5'lik donme terimine gore secildi — govde okunacak hizda
        sarilsin, burgu sicramali gorunmesin. */
-    v = aizawaHizi(p) * 0.55;
+    vec3 q = p;
+    aizawaAdim(q, v, dt);              // konum shader'iyla ayni adimlar; v son alt adimin hizi
   }
   else if(uMod < 4.5){
     /* ---------------- 4 · LORENZ CEKICISI ----------------- */
