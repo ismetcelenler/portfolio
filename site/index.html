@@ -56,7 +56,9 @@ body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sa
 /* ---------- simulasyon penceresi: canli sahne bunun ICINDE ---------- */
 /* cerceve yok: sahne dogrudan hero uzerinde, ayni olcude */
 .sim{width:min(760px, 100%);background:transparent}
-.sim .ekran{position:relative;aspect-ratio:760/462;width:100%}
+.sim .ekran{position:relative;aspect-ratio:760/462;width:100%;margin-bottom:-7%}
+/* .ekran'in alt payi cekicinin halesi icin; bos kalan kismini basliga birakir.
+   Yuzde .sim genisligine gore, kutu buyuyup kuculdukce oranla kayar. */
 @media(max-width:620px){.sim .ekran{aspect-ratio:20/21}}
 /* Tuval artik tam ekran ve sabit. Model yine .ekran dikdortgenine cizilir
    (kamera o kutuya gore ayarlanir); tam ekran yalnizca gecis icin. */
@@ -68,9 +70,6 @@ body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sa
   color:var(--ink-60);padding:4px 10px;cursor:pointer;transition:.15s}
 .sim .lr button:hover{border-color:var(--ink-60);color:var(--ink)}
 .sim .lr button[aria-pressed="true"]{border-color:var(--a);color:var(--a)}
-.sim .altyazi{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;justify-content:center;
-  margin-top:12px;font-family:"VT323",monospace;font-size:17px;line-height:1.2;color:var(--ink-60)}
-.sim .altyazi #simAd{color:var(--a)}
 
 /* ---------- alan etiketleri: sag ust, alt alta ---------- */
 .alanlar{position:absolute;right:26px;top:16px;z-index:6;
@@ -421,9 +420,6 @@ h1 .imlec{color:var(--a);animation:imlec 1.1s steps(1) infinite}
     <div class="sim">
       <div class="ekran" id="ekran">
         <div class="uyari" id="uyari">Bu tarayıcıda WebGL2 yok — gerçek sitede burada statik bir yedek görsel olacak.</div>
-      </div>
-      <div class="altyazi">
-        <span id="simAd">Aizawa attractor</span>
       </div>
     </div>
 
@@ -1076,8 +1072,6 @@ function baslat(){
     }
     if(sessiz) return
     lrKutu.hidden = n !== 5
-    const b = ALAN[n]
-    document.getElementById('simAd').textContent = b.ad
     document.querySelectorAll('#alanlar button').forEach(x =>
       x.setAttribute('aria-pressed', x.dataset.a === String(n) ? 'true' : 'false'))
   }
