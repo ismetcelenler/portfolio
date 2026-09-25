@@ -46,6 +46,9 @@ body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,sa
 }
 .ustbar{display:flex;align-items:center;gap:20px;padding:16px 26px;border-bottom:1px solid var(--hair)}
 .mark{font-family:"Fragment Mono",monospace;font-size:12px;letter-spacing:.04em}
+/* sol ust: Hakkimda'daki piksel imzanin aynisi (ayni dosya, onbellekten gelir) */
+/* 34 px gorunur, -7 px pay: cubugun yuksekligi eski yaziyla ayni kalir */
+.mark-imza{display:block;height:34px;width:auto;margin:-7px 0}
 .ustbar nav{margin-left:auto;display:flex;gap:20px}
 .ustbar nav a{color:var(--ink-60);text-decoration:none}
 .ustbar nav a:hover{color:var(--ink)}
@@ -372,7 +375,7 @@ h1 .imlec{color:var(--a);animation:imlec 1.1s steps(1) infinite}
 <canvas id="sahne"></canvas>
 
 <div class="ustbar">
-  <span class="mark">İSMET ÇELENLER</span>
+  <img class="mark-imza" src="ad-imza.svg?v=2" alt="İsmet Çelenler" width="1834" height="475" decoding="async">
   <nav><a href="#hakkimda"><i class="ik" style="--ik:url(ikon/single-user-shield.svg)" aria-hidden="true"></i>Hakkında</a><a href="#projeler"><i class="ik" style="--ik:url(ikon/content-files-folder-open.svg)" aria-hidden="true"></i>Projeler</a><a href="#iletisim"><i class="ik" style="--ik:url(ikon/email-envelope.svg)" aria-hidden="true"></i>İletişim</a></nav>
 </div>
 
